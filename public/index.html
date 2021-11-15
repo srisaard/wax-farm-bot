@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Wax bot</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src='/js/waxjs.js'></script>
+  <script src="/js/tasktimer.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity=
+        "sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" 
+        crossorigin="anonymous">
+  </script>
+</head>
+<body>
+  <div class="container">
+
+    <h1>SIMPLE Farming bot</h1>
+
+    <button id="login" onclick=login() >WAX Login</button><br><br>
+    <hr>
+    <label>updater:</label><input id="updater"><t></t>
+    <!-- <label>message:</label> -->
+    <input id="message" style="display:none;"><br><br>
+    <!-- <label>fail:</label> -->
+    <input type="checkbox" id="fail" value="fail" style="display:none;"><t>
+    <button id="sign" onclick=sign() >Sign transaction</button><br><br>
+    <!-- <label>Current Message</label> -->
+    <h3 id="current" style="display:none;"></h3><br><br>
+    <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"></input>    <label id="fwBalance"></label>
+    <h5 id="resFarmersworld"></h5>
+    <hr>
+    <label>FarmingTales</label>    <input type="checkbox" id="ftCheck" checked="true"></input>
+    <h5 id="resFarmingtales"></h5>
+    <hr>
+    <label>nftPanda</label>    <input type="checkbox" id="pandaCheck" checked="true"></input>
+    <h5 id="resnftPanda"></h5>
+    <hr>
+    <label>Transaction Results</label>
+    <h5 id="response"></h5>
+</div>
+<button type="button" class="regular" name="edit" id="submit" style="display:none;"></button>
+<script>
+  const { TaskTimer } = tasktimer;
+  const wax = new waxjs.WaxJS({
+    rpcEndpoint: 'https://wax.pink.gg', //'https://api.waxsweden.org', // 
+    tryAutoLogin: true,
+    waxSigningURL: "https://all-access.wax.io",
+    waxAutoSigningURL: "https://api-idm.wax.io/v1/accounts/auto-accept/"
+  });
+  // const wax = new waxjs.WaxJS({
+  //   rpcEndpoint: 'http://wax-all.test:8888',
+  //   tryAutoLogin: true,
+  //   waxSigningURL: 'http://all-access.wax.test:8113',
+  //   waxAutoSigningURL: 'http://idm.wax.test:8113/v1/accounts/auto-accept/'
+  // });
+
+  async function login() {
+    try {
+      const userAccount = await wax.login();
+      document.getElementById('updater').value = userAccount;
+      await getCurrentMessage();
+      console.log("LOGIN SUCCESS!");
+    } catch(e) {
+      document.getElementById('response').append(e.message);
+    }
+  }
+
+  async function Farmersworld_getTools() {
+    if (!document.getElementById("fwCheck").checked){
+      return;
+    }
+    const result = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
+    const balance = await getTableRows("farmersworld", "accounts", wax.userAccount);
+    document.getElementById('fwBalance').innerHTML = balance.balances;
+    document.getElementById('resFarmersworld').innerHTML = `Energy ${balance.energy}/${balance.max_energy}<br>`;
+
+    result.forEach(async element => {
+      // let toolName = await getTableRows_byIndex("farmersworld", 'toolconfs', element.template_id, '6', 'template_id_type');
+      console.log(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
+      document.getElementById('resFarmersworld').append(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)},
+        current_durability: ${element.current_durability}/${element.durability}`);
+      if (element.next_availability - Date.now()/1000 < 0){
+        let config = {
+              actions: [{
+                account: 'farmersworld',
+                name: 'claim',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  owner: wax.userAccount,
+                  asset_id: element.asset_id
+                },
+              }]
+            };
+        await sign(config);
+        console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
+        $.ajax({
+            type: "POST",
+            url: "/submit",
+            data: {
+                  detail: `FW => Id ${element.asset_id},\n🪓 HARVEST SUCCESS!\n
+                  current_durability: ${element.current_durability}/${element.durability}\n
+                  Energy ${balance.energy}/${balance.max_energy}` 
+              }
+          });
+      }
+    
+    });
+  }
+
+  async function Farmingtals_getAnimals() {
+    if (!document.getElementById("ftCheck").checked){
+      return;
+    }
+    document.getElementById('resFarmingtales').innerText = "";
+    const result = await getTableRows_byIndex("farminggames", "animal", wax.userAccount, '2', 'name');
+    console.log(result);
+
+    let asset_id;
+    result.forEach( async element => {
+      let coolDown = await getTableRows("farminggames", 'confanimal', element.template_id.toString());
+      asset_id = element.asset_id;
+      let last_harvest = Date.now()/1000 - element.last_harvest;
+      console.log(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
+      document.getElementById('resFarmingtales').append(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
+      document.getElementById('resFarmingtales').innerHTML += "<br>";
+      if (coolDown.cooldown - last_harvest < 0){
+        let config = {
+              actions: [{
+                account: 'farminggames',
+                name: 'harvestanim',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  account: wax.userAccount,
+                  asset_id: element.asset_id
+                },
+              }]
+            };
+        await sign(config);
+        console.log(`Id ${element.asset_id}, HARVEST SUCCESS!`);
+        $.ajax({
+            type: "POST",
+            url: "/submit",
+            data: {
+                  detail: `FT => ${coolDown.label} 🐄 HARVEST SUCCESS!`
+              }
+          });
+      }
+    });
+
+  }
+
+  async function sign(configTranscat) {
+    if(!wax.api) {
+      return document.getElementById('response').append('* Login first *');
+    }
+
+    const updater = document.getElementById('updater').value;
+    const message = document.getElementById('message').value;
+    const fail = document.getElementById('fail').checked;
+
+    try {
+      const result = await wax.api.transact(configTranscat, {
+        blocksBehind: 3,
+        expireSeconds: 30
+      });
+      
+      document.getElementById('response').append(JSON.stringify(result));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await getCurrentMessage();
+    } catch(e) {
+      document.getElementById('response').innerText = e.message;
+    }
+  }
+
+  async function getTableRows_byIndex(code, tableName, bound, index, key_type){
+    if (typeof(code) != "string" || 
+        typeof(bound) != "string" || 
+        typeof(tableName) != "string" || 
+        typeof(index) != "string" || 
+        typeof(key_type) != "string") {
+      return false;
+    }
+    let result;
+    try {
+      result = await wax.api.rpc.get_table_rows({
+        json: true,               // Get the response as json
+        code: code,      // Contract that we target
+        scope: code,         // Account that owns the data
+        table: tableName,        // Table name
+        index_position: index,
+        key_type: key_type,
+        lower_bound: bound,
+        upper_bound: bound,
+        reverse: false,           // Optional: Get reversed data
+    });
+    } catch(e) {
+      document.getElementById('response').append(e.message);
+      console.log("ERROR FOR: " + code + ", " + tableName + ", " + bound);
+    }
+    return result.rows;
+  }
+
+  async function getTableRows(code, tableName, bound, limit=1){
+    if (typeof(code) != "string" || 
+        typeof(bound) != "string" || 
+        typeof(tableName) != "string") {
+      return false;
+    }
+    let result;
+    try {
+      result = await wax.api.rpc.get_table_rows({
+        json: true,               // Get the response as json
+        code: code,      // Contract that we target
+        scope: code,         // Account that owns the data
+        table: tableName,        // Table name
+        lower_bound: bound,
+        upper_bound: bound,
+        limit: limit,                // Maximum number of rows that we want to get
+        reverse: false,           // Optional: Get reversed data
+        show_payer: false          // Optional: Show ram payer
+    });
+    } catch(e) {
+      document.getElementById('response').append(e.message);
+      console.log("ERROR FOR: " + code + ", " + tableName + ", " + bound);
+    }
+    return result.rows[0];
+  }
+
+  async function getPanda(){
+    
+    if (!document.getElementById("pandaCheck").checked){
+      return;
+    }
+    document.getElementById('resnftPanda').innerText = "";
+    let res = await getTableRows("nftpandawofg", "usersnew", wax.userAccount);
+    if (!res){
+      console.log("GET PANDA ERROR");
+      return;
+    }
+    
+    for (let i=0; i<res.max_slots; i++){
+      let ret = await getTableRows("nftpandawofg", 'nftsongamec', res.slots_count[i].toString());
+      console.log(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}`);
+      document.getElementById('resnftPanda').append(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}`);
+      document.getElementById('resnftPanda').innerHTML += "<br>";
+      if (ret.timer - Date.now()/1000 < 0){
+        let config = {
+              actions: [{
+                account: 'nftpandawofg',
+                name: 'printrand',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  username: wax.userAccount,
+                  assoc_id: res.slots_count[i],
+                  signing_value: Math.floor(Math.random() * 2^64)
+                },
+              }]
+            };
+        await sign(config);
+        console.log(`Id ${res.slots_count[i]}, HARVEST SUCCESS!`);
+        $.ajax({
+            type: "POST",
+            url: "/submit",
+            data: {
+                  detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!`
+              }
+          });
+      }
+    }
+
+    // console.log(JSON.stringify(res));
+  }
+
+  async function getCurrentMessage() {
+    const res = await wax.rpc.get_table_rows({
+      json: true,
+      code: 'test.wax',
+      scope: 'test.wax',
+      table: 'messages',
+      lower_bound: wax.userAccount,
+      upper_bound: wax.userAccount,
+    });
+
+    const message = res.rows[0] ? res.rows[0].message : `<No message is set for ${wax.userAccount}>`;
+    document.getElementById('current').textContent = message;
+  }
+
+// --------------------------------------------Run at init---------------------------------------//
+  // set a random value to the initial message value
+  document.getElementById('message').value = Math.random().toString(36).substring(2);
+  login();
+
+  const count = 10;
+  const timerMain = new TaskTimer(1000);
+  timerMain.add([
+    {
+      id: 'FarmingTales',       // unique ID of the task
+      // tickDelay: 1,       // 1 tick delay before first run
+      tickInterval: 55,   // run every 10 ticks (10 x interval = 10000 ms)
+      totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
+      callback(task) {
+          // timerlogin.reset();
+          console.log(`${task.id} task has run ${task.currentRuns} times.`);
+          Farmingtals_getAnimals();
+      }
+    },
+    {
+      id: 'FarmersWorld',       // unique ID of the task
+      // tickDelay: 1,       // 1 tick delay before first run
+      tickInterval: 50,   // run every 10 ticks (10 x interval = 10000 ms)
+      totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
+      callback(task) {
+          // timerlogin.reset();
+          console.log(`${task.id} task has run ${task.currentRuns} times.`);
+          Farmersworld_getTools();
+      }
+    },
+    {
+      id: 'nftPanda',       // unique ID of the task
+      // tickDelay: 1,       // 1 tick delay before first run
+      tickInterval: 60,   // run every 10 ticks (10 x interval = 10000 ms)
+      totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
+      callback(task) {
+          // timerlogin.reset();
+          console.log(`${task.id} task has run ${task.currentRuns} times.`);
+          getPanda();
+      }
+    }
+    
+  ]);
+  timerMain.start()
+
+  function sec2time(timeInSeconds) {
+    var pad = function(num, size) { return ('000' + num).slice(size * -1); },
+    time = parseFloat(timeInSeconds).toFixed(3),
+    hours = Math.floor(time / 60 / 60),
+    minutes = Math.floor(time / 60) % 60,
+    seconds = Math.floor(time - minutes * 60),
+    milliseconds = time.slice(-3);
+
+    return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2) + ',' + pad(milliseconds, 3);
+  }
+
+//   $(document).ready(function () {
+//    $("#submit").click(function () {
+//       $.post("/submit",
+//          {
+//             name: "viSion",
+//             designation: "Professional gamer"
+//          });
+//    });
+// });
+</script>
+</body>
+</html>
