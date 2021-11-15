@@ -1,13 +1,14 @@
 # wax-farm-bot
 For farmersworld/farmingtales
 
-1. Install npm and nodejs
+1. Download zip and Extract/Unzip to wherever you want
+2. Install npm and nodejs
 > https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Input your line token to .env file
+3. Input your line token to .env file
 > TOKEN=uaIASUeuqieuiHAIHFHDAIFNKjdankfJ
-3. run
+4. run
 > node .
-4. open browser and go to
+5. open browser and go to
 > http://localhost:6969/
 
 <br>
