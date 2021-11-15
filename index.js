@@ -18,7 +18,6 @@ app.use((req, res, next) => {
 
  app.post("/submit", (req, res)=>{
     const token = process.env.TOKEN
-    console.log(token)
     const url_line_notification = "https://notify-api.line.me/api/notify";
     if (token == '') {
         res.end("");

@@ -83,16 +83,6 @@
       document.getElementById('resFarmersworld').append(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)},
         current_durability: ${element.current_durability}/${element.durability}`);
 
-        $.ajax({
-            type: "POST",
-            url: "/submit",
-            data: {
-                  detail: `FW => Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` +
-                  `current_durability: ${element.current_durability}/${element.durability}\n` +
-                  `Energy ${balance.energy}/${balance.max_energy}`
-              }
-          });
-
       if (element.next_availability - Date.now()/1000 < 0){
         let config = {
               actions: [{
