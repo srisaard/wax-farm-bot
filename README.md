@@ -1,4 +1,6 @@
 # wax-farm-bot
+CODE BASE: https://github.com/worldwide-asset-exchange/waxjs
+
 For farmersworld/farmingtales
 
 1. Download zip and Extract/Unzip to wherever you want
