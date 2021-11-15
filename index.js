@@ -1,6 +1,8 @@
 var express = require('express');
 var request = require('request');
 var app = express();
+const dotenv = require('dotenv');
+dotenv.config();
 
 app.use(express.static(__dirname + '/public')); //__dir and not _dir
 app.use(express.urlencoded({extended: true}));
@@ -15,7 +17,8 @@ app.use((req, res, next) => {
  });
 
  app.post("/submit", (req, res)=>{
-    const token = ''
+    const token = process.env.TOKEN
+    console.log(token)
     const url_line_notification = "https://notify-api.line.me/api/notify";
     if (token == '') {
         res.end("");
