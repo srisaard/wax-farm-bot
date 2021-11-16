@@ -104,9 +104,9 @@
             type: "POST",
             url: "/submit",
             data: {
-                  detail: `FW => Id ${element.asset_id},\n🪓 HARVEST SUCCESS!\n
-                  current_durability: ${element.current_durability}/${element.durability}\n
-                  Energy ${balance.energy}/${balance.max_energy}` 
+                  detail: `FW => Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` +
+                  `current_durability: ${element.current_durability}/${element.durability}\n`+
+                  `Energy ${balance.energy}/${balance.max_energy}` 
               }
           });
       }
