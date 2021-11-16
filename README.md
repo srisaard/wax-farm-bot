@@ -9,7 +9,8 @@ For farmersworld/farmingtales
 3. Input your line token to .env file
 > TOKEN=uaIASUeuqieuiHAIHFHDAIFNKjdankfJ
 4. run
-> node .
+> <img src="https://user-images.githubusercontent.com/49296797/141880204-5c6c2973-2519-4128-9709-ed2ef2abc3e8.png" width=40%>
+> <br>node .
 5. open browser and go to
 > http://localhost:6969/
 
