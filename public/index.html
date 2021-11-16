@@ -27,6 +27,7 @@
     <!-- <label>fail:</label> -->
     <input type="checkbox" id="fail" value="fail" style="display:none;"><t>
     <button id="sign" onclick=sign() >Sign transaction</button><br><br>
+    <h2 id="waxusd"></h2>
     <!-- <label>Current Message</label> -->
     <h3 id="current" style="display:none;"></h3><br><br>
     <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"></input>    <label id="fwBalance"></label>
@@ -35,7 +36,7 @@
     <label>FarmingTales</label>    <input type="checkbox" id="ftCheck" checked="true"></input>
     <h5 id="resFarmingtales"></h5>
     <hr>
-    <label>nftPanda</label>    <input type="checkbox" id="pandaCheck" checked="true"></input>
+    <label>nftPanda</label>    <input type="checkbox" id="pandaCheck" checked="true"></input>    <label id="pandaBalance"></label>
     <h5 id="resnftPanda"></h5>
     <hr>
     <label>Transaction Results</label>
@@ -69,20 +70,33 @@
   }
 
   async function Farmersworld_getTools() {
+    let price = await fetch("https://wax.alcor.exchange/api/markets/39");
+    let priceJson = await price.json();
+    document.getElementById("waxusd").innerHTML = "WAX/USD : " + priceJson.last_price;
+
     if (!document.getElementById("fwCheck").checked){
       return;
     }
+    
+    let FWW = await fetch("https://wax.alcor.exchange/api/markets/104");
+    FWW = await FWW.json();
+    let FWF = await fetch("https://wax.alcor.exchange/api/markets/105");
+    FWF = await FWF.json();
+    let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
+    FWG = await FWG.json();
+
     const result = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
     const balance = await getTableRows("farmersworld", "accounts", wax.userAccount);
     document.getElementById('fwBalance').innerHTML = balance.balances;
-    document.getElementById('resFarmersworld').innerHTML = `Energy ${balance.energy}/${balance.max_energy}<br>`;
+    document.getElementById('resFarmersworld').innerHTML = `FWW: ${FWW.last_price}, FWF: ${FWF.last_price}, FWG: ${FWG.last_price}<br>`
+    document.getElementById('resFarmersworld').innerHTML += `Energy ${balance.energy}/${balance.max_energy}<br>`;
 
     result.forEach(async element => {
       // let toolName = await getTableRows_byIndex("farmersworld", 'toolconfs', element.template_id, '6', 'template_id_type');
       console.log(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
       document.getElementById('resFarmersworld').append(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)},
         current_durability: ${element.current_durability}/${element.durability}`);
-
+      document.getElementById('resFarmersworld').innerHTML += "<br>";
       if (element.next_availability - Date.now()/1000 < 0){
         let config = {
               actions: [{
@@ -109,8 +123,7 @@
                   `Energy ${balance.energy}/${balance.max_energy}` 
               }
           });
-      }
-    
+      }    
     });
   }
 
@@ -241,6 +254,11 @@
     if (!document.getElementById("pandaCheck").checked){
       return;
     }
+
+    let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner="+wax.userAccount+"&page=1&limit=100&order=desc&sort=asset_id");
+    let FoodID = await jsonFood.json();
+    document.getElementById('pandaBalance').innerHTML =  "Food remain : " + Object.keys(FoodID.data).length + "ea";
+
     document.getElementById('resnftPanda').innerText = "";
     let res = await getTableRows("nftpandawofg", "usersnew", wax.userAccount);
     if (!res){
@@ -251,7 +269,8 @@
     for (let i=0; i<res.max_slots; i++){
       let ret = await getTableRows("nftpandawofg", 'nftsongamec', res.slots_count[i].toString());
       console.log(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}`);
-      document.getElementById('resnftPanda').append(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}`);
+      document.getElementById('resnftPanda').append(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}` +
+        ` energy: ${ret.energy}`);
       document.getElementById('resnftPanda').innerHTML += "<br>";
       if (ret.timer - Date.now()/1000 < 0){
         let config = {
@@ -265,7 +284,7 @@
                 data: {
                   username: wax.userAccount,
                   assoc_id: res.slots_count[i],
-                  signing_value: Math.floor(Math.random() * 2^64)
+                  signing_value: Math.floor(Math.random() * 18446744073709551616)
                 },
               }]
             };
@@ -275,9 +294,35 @@
             type: "POST",
             url: "/submit",
             data: {
-                  detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!`
+                  detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!\n` +
+                          `Food remain ${Object.keys(FoodID.data).length}`
               }
           });
+      }
+
+      
+      if (ret.energy < 4000){
+        let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner=" + wax.userAccount + "&page=1&limit=100&order=desc&sort=asset_id");
+        let FoodID = await jsonFood.json();
+        console.log(FoodID.data[0].asset_id);
+        let config = {
+              actions: [{
+                account: 'atomicassets',
+                name: 'transfer',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  from: wax.userAccount,
+                  to: "nftpandawofg",
+                  asset_ids: [FoodID.data[0].asset_id],
+                  memo: "eatpanda " + res.slots_count[i] + " " + FoodID.data[0].asset_id
+                },
+              }]
+            };
+        await sign(config);
+        console.log(`Id ${res.slots_count[i]}, FEED SUCCESS!`);
       }
     }
 
