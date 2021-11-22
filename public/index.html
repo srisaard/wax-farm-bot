@@ -70,9 +70,9 @@
   }
 
   async function Farmersworld_getTools() {
-    let price = await fetch("https://wax.alcor.exchange/api/markets/39");
+    let price = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD");
     let priceJson = await price.json();
-    document.getElementById("waxusd").innerHTML = "WAX/USD : " + priceJson.last_price;
+    document.getElementById("waxusd").innerHTML = "WAX/USD : " + priceJson.wax.usd;
 
     if (!document.getElementById("fwCheck").checked){
       return;
@@ -93,7 +93,7 @@
 
     result.forEach(async element => {
       // let toolName = await getTableRows_byIndex("farmersworld", 'toolconfs', element.template_id, '6', 'template_id_type');
-      console.log(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
+      // console.log(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
       document.getElementById('resFarmersworld').append(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)},
         current_durability: ${element.current_durability}/${element.durability}`);
       document.getElementById('resFarmersworld').innerHTML += "<br>";
@@ -131,16 +131,20 @@
     if (!document.getElementById("ftCheck").checked){
       return;
     }
-    document.getElementById('resFarmingtales').innerText = "";
+
+    let SEST = await fetch("https://wax.alcor.exchange/api/markets/156");
+    SEST = await SEST.json();
+
+    document.getElementById('resFarmingtales').innerHTML = `SEST: ${SEST.last_price}<br>`;
     const result = await getTableRows_byIndex("farminggames", "animal", wax.userAccount, '2', 'name');
-    console.log(result);
+    // console.log(result);
 
     let asset_id;
     result.forEach( async element => {
       let coolDown = await getTableRows("farminggames", 'confanimal', element.template_id.toString());
       asset_id = element.asset_id;
       let last_harvest = Date.now()/1000 - element.last_harvest;
-      console.log(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
+      // console.log(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
       document.getElementById('resFarmingtales').append(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
       document.getElementById('resFarmingtales').innerHTML += "<br>";
       if (coolDown.cooldown - last_harvest < 0){
@@ -255,11 +259,15 @@
       return;
     }
 
+    let BAM = await fetch("https://wax.alcor.exchange/api/markets/155");
+    BAM = await BAM.json();
+
     let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner="+wax.userAccount+"&page=1&limit=100&order=desc&sort=asset_id");
     let FoodID = await jsonFood.json();
     document.getElementById('pandaBalance').innerHTML =  "Food remain : " + Object.keys(FoodID.data).length + "ea";
 
-    document.getElementById('resnftPanda').innerText = "";
+    document.getElementById('resnftPanda').innerHTML = `BAM: ${BAM.last_price}<br>`;
+
     let res = await getTableRows("nftpandawofg", "usersnew", wax.userAccount);
     if (!res){
       console.log("GET PANDA ERROR");
@@ -268,7 +276,7 @@
     
     for (let i=0; i<res.max_slots; i++){
       let ret = await getTableRows("nftpandawofg", 'nftsongamec', res.slots_count[i].toString());
-      console.log(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}`);
+      // console.log(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}`);
       document.getElementById('resnftPanda').append(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}` +
         ` energy: ${ret.energy}`);
       document.getElementById('resnftPanda').innerHTML += "<br>";
@@ -399,15 +407,6 @@
     return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2) + ',' + pad(milliseconds, 3);
   }
 
-//   $(document).ready(function () {
-//    $("#submit").click(function () {
-//       $.post("/submit",
-//          {
-//             name: "viSion",
-//             designation: "Professional gamer"
-//          });
-//    });
-// });
 </script>
 </body>
 </html>
