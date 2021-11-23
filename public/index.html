@@ -44,6 +44,14 @@
 </div>
 <button type="button" class="regular" name="edit" id="submit" style="display:none;"></button>
 <script>
+  // Common param
+  const nftPandaFEED = 3500;
+  const fwRepair = 30;
+  const fwRecover = 30;
+  // END
+
+
+
   const { TaskTimer } = tasktimer;
   const wax = new waxjs.WaxJS({
     rpcEndpoint: 'https://wax.pink.gg', //'https://api.waxsweden.org', // 
@@ -51,12 +59,7 @@
     waxSigningURL: "https://all-access.wax.io",
     waxAutoSigningURL: "https://api-idm.wax.io/v1/accounts/auto-accept/"
   });
-  // const wax = new waxjs.WaxJS({
-  //   rpcEndpoint: 'http://wax-all.test:8888',
-  //   tryAutoLogin: true,
-  //   waxSigningURL: 'http://all-access.wax.test:8113',
-  //   waxAutoSigningURL: 'http://idm.wax.test:8113/v1/accounts/auto-accept/'
-  // });
+  
 
   async function login() {
     try {
@@ -123,8 +126,80 @@
                   `Energy ${balance.energy}/${balance.max_energy}` 
               }
           });
-      }    
+      }
+
+      if (element.current_durability < fwRepair)
+      {
+        const current_gold = parseInt(balance.balances[2].split(".")[0]);
+        let goldNeed = (element.durability - element.current_durability) * 3;
+        if ( goldNeed > current_gold )
+        {
+          $.ajax({
+            type: "POST",
+            url: "/submit",
+            data: {
+                  detail: `FW => Need more 🎟️\n ${current_gold} remains!\n` +
+                  `current_durability: ${element.current_durability}/${element.durability}` 
+              }
+          });
+          return;
+        }
+
+        let config = {
+              actions: [{
+                account: 'farmersworld',
+                name: 'repair',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  asset_owner: wax.userAccount,
+                  asset_id: element.asset_id
+                },
+              }]
+            };
+        await sign(config);
+        console.log(`Id ${ element.asset_id}, REPAIR SUCCESS!`);
+      }
+
+
     });
+
+    if (balance.energy < fwRecover)
+    {
+      const current_food = parseInt(balance.balances[1].split(".")[0]);
+      let recover = current_food * 5;
+      if (recover == 0)
+      {
+        $.ajax({
+            type: "POST",
+            url: "/submit",
+            data: {
+                  detail: `FW => Need more 🐟\n ${current_food} remains!\n` +
+                  `Energy ${balance.energy}/${balance.max_energy}` 
+              }
+          });
+          return;
+      }
+      if (recover > balance.max_energy) recover = balance.max_energy - balance.energy;
+      let config = {
+              actions: [{
+                account: 'farmersworld',
+                name: 'recover',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  owner: wax.userAccount,
+                  energy_recovered: recover
+                },
+              }]
+            };
+        await sign(config);
+        console.log(`${recover} energy, RECOVER SUCCESS!`);
+    }
   }
 
   async function Farmingtals_getAnimals() {
@@ -193,9 +268,10 @@
       
       document.getElementById('response').append(JSON.stringify(result));
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await getCurrentMessage();
+      // await getCurrentMessage();
     } catch(e) {
       document.getElementById('response').innerText = e.message;
+      return e.message;
     }
   }
 
@@ -309,7 +385,7 @@
       }
 
       
-      if (ret.energy < 4000){
+      if (ret.energy < nftPandaFEED){
         let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner=" + wax.userAccount + "&page=1&limit=100&order=desc&sort=asset_id");
         let FoodID = await jsonFood.json();
         console.log(FoodID.data[0].asset_id);
@@ -373,7 +449,7 @@
     {
       id: 'FarmersWorld',       // unique ID of the task
       // tickDelay: 1,       // 1 tick delay before first run
-      tickInterval: 50,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 40,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
