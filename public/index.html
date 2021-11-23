@@ -33,7 +33,7 @@
     <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"></input>    <label id="fwBalance"></label>
     <h5 id="resFarmersworld"></h5>
     <hr>
-    <label>FarmingTales</label>    <input type="checkbox" id="ftCheck" checked="true"></input>
+    <label>FarmingTales</label>    <input type="checkbox" id="ftCheck" checked="true"></input>    <label id="ftBalance"></label>
     <h5 id="resFarmingtales"></h5>
     <hr>
     <label>nftPanda</label>    <input type="checkbox" id="pandaCheck" checked="true"></input>    <label id="pandaBalance"></label>
@@ -49,8 +49,6 @@
   const fwRepair = 30;
   const fwRecover = 30;
   // END
-
-
 
   const { TaskTimer } = tasktimer;
   const wax = new waxjs.WaxJS({
@@ -115,17 +113,20 @@
                 },
               }]
             };
-        await sign(config);
-        console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
-        $.ajax({
-            type: "POST",
-            url: "/submit",
-            data: {
-                  detail: `FW => Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` +
-                  `current_durability: ${element.current_durability}/${element.durability}\n`+
-                  `Energy ${balance.energy}/${balance.max_energy}` 
-              }
-          });
+        let ret = await sign(config);
+        if (ret == true){
+          console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
+          $.ajax({
+              type: "POST",
+              url: "/submit",
+              data: {
+                    detail: `FW => Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` +
+                    `current_durability: ${element.current_durability}/${element.durability}\n`+
+                    `Energy ${balance.energy}/${balance.max_energy}` 
+                }
+            });
+        }
+        else{ console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`); }
       }
 
       if (element.current_durability < fwRepair)
@@ -159,8 +160,9 @@
                 },
               }]
             };
-        await sign(config);
-        console.log(`Id ${ element.asset_id}, REPAIR SUCCESS!`);
+        let ret = await sign(config);
+        if (ret == true){console.log(`Id ${ element.asset_id}, REPAIR SUCCESS!`);}
+        else{console.log(`Id ${ element.asset_id}, REPAIR FAILED! ${ret}`);}
       }
 
 
@@ -197,8 +199,9 @@
                 },
               }]
             };
-        await sign(config);
-        console.log(`${recover} energy, RECOVER SUCCESS!`);
+        let ret = await sign(config);
+        if (ret == true){console.log(`${recover} energy, RECOVER SUCCESS!`);}
+        else{console.log(`${recover} energy, RECOVER FAILED! ${ret}`);}
     }
   }
 
@@ -213,7 +216,11 @@
     document.getElementById('resFarmingtales').innerHTML = `SEST: ${SEST.last_price}<br>`;
     const result = await getTableRows_byIndex("farminggames", "animal", wax.userAccount, '2', 'name');
     // console.log(result);
-
+    const resource = await getTableRows("farminggames", "resources", wax.userAccount);
+    const food = resource.food;
+    const water = resource.water;
+    document.getElementById('ftBalance').innerHTML = `FOOD: ${food}, WATER: ${water}`;
+    let refill = true;
     let asset_id;
     result.forEach( async element => {
       let coolDown = await getTableRows("farminggames", 'confanimal', element.template_id.toString());
@@ -237,7 +244,8 @@
                 },
               }]
             };
-        await sign(config);
+        let ret = await sign(config);
+        if (ret == true){
         console.log(`Id ${element.asset_id}, HARVEST SUCCESS!`);
         $.ajax({
             type: "POST",
@@ -246,6 +254,31 @@
                   detail: `FT => ${coolDown.label} 🐄 HARVEST SUCCESS!`
               }
           });
+        }
+        else{console.log(`Id ${element.asset_id}, HARVEST FAILED! ${ret}`);}
+      }
+
+      if (food < coolDown.food && refill){
+        refill = false;
+        let config = {
+              actions: [{
+                account: 'farmingtoken',
+                name: 'transfer',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  from: wax.userAccount,
+                  to: "farminggames",
+                  quantity: "20.0000 SEST",
+                  memo: "food_refill"
+                },
+              }]
+            };
+        let ret = await sign(config);
+        if (ret==true){console.log("food_refill SUCCESS!");}
+        else {console.log("food_refill FAILED!");}
       }
     });
 
@@ -268,6 +301,7 @@
       
       document.getElementById('response').append(JSON.stringify(result));
       await new Promise(resolve => setTimeout(resolve, 1000));
+      return true;
       // await getCurrentMessage();
     } catch(e) {
       document.getElementById('response').innerText = e.message;
@@ -372,16 +406,19 @@
                 },
               }]
             };
-        await sign(config);
-        console.log(`Id ${res.slots_count[i]}, HARVEST SUCCESS!`);
-        $.ajax({
-            type: "POST",
-            url: "/submit",
-            data: {
-                  detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!\n` +
-                          `Food remain ${Object.keys(FoodID.data).length}`
-              }
-          });
+        let ret = await sign(config);
+        if (ret == true){
+          console.log(`Id ${res.slots_count[i]}, HARVEST SUCCESS!`);
+          $.ajax({
+              type: "POST",
+              url: "/submit",
+              data: {
+                    detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!\n` +
+                            `Food remain ${Object.keys(FoodID.data).length}`
+                }
+            });
+        }
+        else { console.log(`Id ${res.slots_count[i]}, HARVEST FAILED! ${ret}`); }
       }
 
       
@@ -405,12 +442,11 @@
                 },
               }]
             };
-        await sign(config);
-        console.log(`Id ${res.slots_count[i]}, FEED SUCCESS!`);
+        let ret = await sign(config);
+        if (ret == true){console.log(`Id ${res.slots_count[i]}, FEED SUCCESS!`);}
+        else {console.log(`Id ${res.slots_count[i]}, FEED FAILED! ${ret}`);}
       }
     }
-
-    // console.log(JSON.stringify(res));
   }
 
   async function getCurrentMessage() {
