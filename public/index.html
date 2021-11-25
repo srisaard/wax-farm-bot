@@ -132,7 +132,7 @@
       if (element.current_durability < fwRepair)
       {
         const current_gold = balance.balances[2].split(" ")[0];
-        let goldNeed = (element.durability - element.current_durability) * 5;
+        let goldNeed = (element.durability - element.current_durability) / 5;
         if ( goldNeed > current_gold )
         {
           $.ajax({
