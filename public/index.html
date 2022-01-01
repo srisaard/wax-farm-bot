@@ -39,6 +39,9 @@
     <label>nftPanda</label>    <input type="checkbox" id="pandaCheck" checked="true"></input>    <label id="pandaBalance"></label>
     <h5 id="resnftPanda"></h5>
     <hr>
+    <label>officeland</label>    <input type="checkbox" id="officelandCheck" checked="true"></input>    <label id="officelandBalance"></label>
+    <h5 id="resofficeland"></h5>
+    <hr>
     <label>Transaction Results</label>
     <h5 id="response"></h5>
 </div>
@@ -52,7 +55,7 @@
 
   const { TaskTimer } = tasktimer;
   const wax = new waxjs.WaxJS({
-    rpcEndpoint: 'https://wax.pink.gg', //'https://api.waxsweden.org', // 
+    rpcEndpoint: 'https://api.waxsweden.org', // // 'https://wax.pink.gg', 
     tryAutoLogin: true,
     waxSigningURL: "https://all-access.wax.io",
     waxAutoSigningURL: "https://api-idm.wax.io/v1/accounts/auto-accept/"
@@ -247,13 +250,13 @@
         let ret = await sign(config);
         if (ret == true){
         console.log(`Id ${element.asset_id}, HARVEST SUCCESS!`);
-        $.ajax({
-            type: "POST",
-            url: "/submit",
-            data: {
-                  detail: `FT => ${coolDown.label} 🐄 HARVEST SUCCESS!`
-              }
-          });
+        //$.ajax({
+        //    type: "POST",
+        //    url: "/submit",
+        //    data: {
+        //          detail: `FT => ${coolDown.label} 🐄 HARVEST SUCCESS!`
+        //      }
+        //  });
         }
         else{console.log(`Id ${element.asset_id}, HARVEST FAILED! ${ret}`);}
       }
@@ -262,17 +265,14 @@
         refill = false;
         let config = {
               actions: [{
-                account: 'farmingtoken',
-                name: 'transfer',
+                account: 'farminggames',
+                name: 'refillfood',
                 authorization: [{
                   actor: wax.userAccount,
                   permission: 'active',
                 }],
                 data: {
-                  from: wax.userAccount,
-                  to: "farminggames",
-                  quantity: "20.0000 SEST",
-                  memo: "food_refill"
+                  account: wax.userAccount
                 },
               }]
             };
@@ -409,14 +409,14 @@
         let ret = await sign(config);
         if (ret == true){
           console.log(`Id ${res.slots_count[i]}, HARVEST SUCCESS!`);
-          $.ajax({
-              type: "POST",
-              url: "/submit",
-              data: {
-                    detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!\n` +
-                            `Food remain ${Object.keys(FoodID.data).length}`
-                }
-            });
+          //$.ajax({
+          //    type: "POST",
+          //    url: "/submit",
+          //    data: {
+          //          detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!\n` +
+          //                  `Food remain ${Object.keys(FoodID.data).length}`
+          //      }
+          //  });
         }
         else { console.log(`Id ${res.slots_count[i]}, HARVEST FAILED! ${ret}`); }
       }
@@ -446,6 +446,97 @@
         if (ret == true){console.log(`Id ${res.slots_count[i]}, FEED SUCCESS!`);}
         else {console.log(`Id ${res.slots_count[i]}, FEED FAILED! ${ret}`);}
       }
+    }
+  }
+  
+  async function Officeland_task(){
+    
+    if (!document.getElementById("officelandCheck").checked){
+      return;
+    }
+
+    let Ocoin = await fetch("https://wax.alcor.exchange/api/markets/258");
+    Ocoin = await Ocoin.json();
+
+    document.getElementById('resofficeland').innerHTML = `Ocoin: ${Ocoin.last_price}<br>`;
+
+    let res = await getTableRows("officegameio", "publicspace", wax.userAccount);
+    if (!res){
+      console.log("GET STAFF ERROR");
+      return;
+    }
+    
+    for (let i=0; i<res.asset_ids.filter(x => x!=0).length; i++){
+      let ret = []
+      ret = await getTableRows_byIndex("officegameio", 'taskassign', res.asset_ids[i].toString(), "2", "i64");
+      
+      if (ret.length == 0){
+      	let jobNum = 4;
+      	if (res.asset_ids[i].toString() == '1099589563866'){jobNum = 5;}
+        let config = {
+              actions: [{
+                account: 'officegameio',
+                name: 'assigntask',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  player: wax.userAccount,
+                  task_id: jobNum,
+                  asset_id: res.asset_ids[i].toString()
+                },
+              }]
+            };
+        let ret_sign = await sign(config);
+        if (ret_sign == true){
+          console.log(`Id ${res.asset_ids[i].toString()}, GO WORK SUCCESS!`);
+        }
+        else { console.log(`Id ${res.asset_ids[i].toString()}, GO WORK FAILED! ${ret}`); }
+        continue;
+      }
+      
+      document.getElementById('resofficeland').append(`asset_id ${res.asset_ids[i]}, next_harvest ${sec2time(ret[0].task_end - Date.now()/1000)}`);
+      document.getElementById('resofficeland').innerHTML += "<br>";
+      if (ret[0].task_end - Date.now()/1000 < 0){
+      	let config = {
+              actions: [{
+                account: 'officegameio',
+                name: 'taskfinished',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  player: wax.userAccount,
+                  taskassign_id: ret[0].taskassign_id.toString()
+                },
+              }]
+            };
+        let ret_sign = await sign(config);
+        if (ret_sign == true){
+          console.log(`Id ${res.asset_ids[i].toString()}, FINISHED TASK!`);
+        }
+      }
+    }
+    
+    res = await getTableRows_byIndex("officegameio", 'finishtask', wax.userAccount, "2", "name");
+    if ((Date.now()/1000 - res[0].finish_time)/86400 > 6){
+    	let config = {
+              actions: [{
+                account: 'officegameio',
+                name: 'claimreward',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  player: wax.userAccount,
+                  finish_id: res[0].finish_id.toString()
+                },
+              }]
+            };
+        let ret_sign = await sign(config);
     }
   }
 
@@ -485,7 +576,7 @@
     {
       id: 'FarmersWorld',       // unique ID of the task
       // tickDelay: 1,       // 1 tick delay before first run
-      tickInterval: 40,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 45,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
@@ -502,6 +593,17 @@
           // timerlogin.reset();
           console.log(`${task.id} task has run ${task.currentRuns} times.`);
           getPanda();
+      }
+    },
+    {
+      id: 'officeland',       // unique ID of the task
+      // tickDelay: 1,       // 1 tick delay before first run
+      tickInterval: 70,   // run every 10 ticks (10 x interval = 10000 ms)
+      totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
+      callback(task) {
+          // timerlogin.reset();
+          console.log(`${task.id} task has run ${task.currentRuns} times.`);
+          Officeland_task();
       }
     }
     
