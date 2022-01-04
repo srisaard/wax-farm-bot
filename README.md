@@ -1,7 +1,7 @@
 # wax-farm-bot
 CODE BASE: https://github.com/worldwide-asset-exchange/waxjs
 
-For farmersworld/farmingtales
+For farmersworld/farmingtales/nftpanda/officeland
 
 1. Download zip and Extract/Unzip to wherever you want
 2. Install npm and nodejs
