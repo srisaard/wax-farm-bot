@@ -208,7 +208,7 @@
     }
   }
 
-  async function Farmingtals_getAnimals() {
+  async function Farmingtals() {
     if (!document.getElementById("ftCheck").checked){
       return;
     }
@@ -217,7 +217,7 @@
     SEST = await SEST.json();
 
     document.getElementById('resFarmingtales').innerHTML = `SEST: ${SEST.last_price}<br>`;
-    const result = await getTableRows_byIndex("farminggames", "animal", wax.userAccount, '2', 'name');
+    const result_animal = await getTableRows_byIndex("farminggames", "animal", wax.userAccount, '2', 'name');
     // console.log(result);
     const resource = await getTableRows("farminggames", "resources", wax.userAccount);
     const food = resource.food;
@@ -225,7 +225,7 @@
     document.getElementById('ftBalance').innerHTML = `FOOD: ${food}, WATER: ${water}`;
     let refill = true;
     let asset_id;
-    result.forEach( async element => {
+    result_animal.forEach( async element => {
       let coolDown = await getTableRows("farminggames", 'confanimal', element.template_id.toString());
       asset_id = element.asset_id;
       let last_harvest = Date.now()/1000 - element.last_harvest;
@@ -279,9 +279,67 @@
         let ret = await sign(config);
         if (ret==true){console.log("food_refill SUCCESS!");}
         else {console.log("food_refill FAILED!");}
-      }
+      }      
     });
 
+    const result_plant = await getTableRows_byIndex("farminggames", "plant", wax.userAccount, '2', 'name');
+    refill = true;
+    result_plant.forEach( async element => {
+        let coolDown = await getTableRows("farminggames", 'confplant', element.plant_id.toString());
+        asset_id = element.id;
+        let last_harvest = Date.now()/1000 - element.last_harvest;
+        // console.log(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
+        document.getElementById('resFarmingtales').append(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
+        document.getElementById('resFarmingtales').innerHTML += "<br>";
+        if (coolDown.cooldown - last_harvest < 0){
+          let config = {
+                actions: [{
+                  account: 'farminggames',
+                  name: 'harvestgardn',
+                  authorization: [{
+                    actor: wax.userAccount,
+                    permission: 'active',
+                  }],
+                  data: {
+                    account: wax.userAccount,
+                    asset_id: element.id
+                  },
+                }]
+              };
+          let ret = await sign(config);
+          if (ret == true){
+          console.log(`Id ${element.id}, HARVEST SUCCESS!`);
+          //$.ajax({
+          //    type: "POST",
+          //    url: "/submit",
+          //    data: {
+          //          detail: `FT => ${coolDown.label} 🍅 HARVEST SUCCESS!`
+          //      }
+          //  });
+          }
+          else{console.log(`Id ${element.id}, HARVEST FAILED! ${ret}`);}
+        }
+  
+        if (water < coolDown.water && refill){
+          refill = false;
+          let config = {
+                actions: [{
+                  account: 'farminggames',
+                  name: 'refillwater',
+                  authorization: [{
+                    actor: wax.userAccount,
+                    permission: 'active',
+                  }],
+                  data: {
+                    account: wax.userAccount
+                  },
+                }]
+              };
+          let ret = await sign(config);
+          if (ret==true){console.log("water_refill SUCCESS!");}
+          else {console.log("water_refill FAILED!");}
+        }      
+      });
   }
 
   async function sign(configTranscat) {
@@ -570,7 +628,7 @@
       callback(task) {
           // timerlogin.reset();
           console.log(`${task.id} task has run ${task.currentRuns} times.`);
-          Farmingtals_getAnimals();
+          Farmingtals();
       }
     },
     {
@@ -624,3 +682,4 @@
 </script>
 </body>
 </html>
+\
