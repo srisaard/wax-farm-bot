@@ -91,6 +91,20 @@
 
     const result = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
     const balance = await getTableRows("farmersworld", "accounts", wax.userAccount);
+    
+    let balanceGold = 0;
+    let balanceFood = 0;
+    balance.balances.forEach(item => {
+    	if (item.includes("GOLD")) 
+    	{
+    		balanceGold = item.split(" ")[0]
+    	}
+    	else if(item.includes("FOOD"))
+    		balanceFood = item.split(" ")[0]
+    	}
+    );
+    console.log(balanceFood, balanceGold)
+    
     document.getElementById('fwBalance').innerHTML = balance.balances;
     document.getElementById('resFarmersworld').innerHTML = `FWW: ${FWW.last_price}, FWF: ${FWF.last_price}, FWG: ${FWG.last_price}<br>`
     document.getElementById('resFarmersworld').innerHTML += `Energy ${balance.energy}/${balance.max_energy}<br>`;
@@ -134,15 +148,14 @@
 
       if (element.current_durability < fwRepair)
       {
-        const current_gold = balance.balances[2].split(" ")[0];
         let goldNeed = (element.durability - element.current_durability) / 5;
-        if ( goldNeed > current_gold )
+        if ( goldNeed > balanceGold )
         {
           $.ajax({
             type: "POST",
             url: "/submit",
             data: {
-                  detail: `FW => Need more 🎟️\n ${current_gold} remains!\n` +
+                  detail: `FW => Need more 🎟️\n ${balanceGold} remains!\n` +
                   `current_durability: ${element.current_durability}/${element.durability}` 
               }
           });
@@ -173,15 +186,14 @@
 
     if (balance.energy < fwRecover)
     {
-      const current_food = parseInt(balance.balances[1].split(".")[0]);
-      let recover = current_food * 5;
+      let recover = balanceFood * 5;
       if (recover == 0)
       {
         $.ajax({
             type: "POST",
             url: "/submit",
             data: {
-                  detail: `FW => Need more 🐟\n ${current_food} remains!\n` +
+                  detail: `FW => Need more 🐟\n ${balanceFood} remains!\n` +
                   `Energy ${balance.energy}/${balance.max_energy}` 
               }
           });
@@ -208,7 +220,7 @@
     }
   }
 
-  async function Farmingtals() {
+  async function Farmingtales() {
     if (!document.getElementById("ftCheck").checked){
       return;
     }
@@ -628,7 +640,7 @@
       callback(task) {
           // timerlogin.reset();
           console.log(`${task.id} task has run ${task.currentRuns} times.`);
-          Farmingtals();
+          Farmingtales();
       }
     },
     {
