@@ -37,6 +37,7 @@
     <h5 id="resFarmingtales"></h5>
     <hr>
     <label>nftPanda</label>    <input type="checkbox" id="pandaCheck" checked="true"></input>    <label id="pandaBalance"></label>
+    <br><select id = "pandaFoodUnit"></select> <select id = "pandaFoodList"></select>  <button type="button" class="regular" onclick=pandaBuyFood() id="pandaBuyFoodButton">Buy</button>
     <h5 id="resnftPanda"></h5>
     <hr>
     <label>officeland</label>    <input type="checkbox" id="officelandCheck" checked="true"></input>    <label id="officelandBalance"></label>
@@ -51,6 +52,28 @@
   const nftPandaFEED = 3500;
   const fwRepair = 30;
   const fwRecover = 30;
+  
+  
+  const dropdownlistPandaFoodList = document.getElementById("pandaFoodList");
+  const dropdownlistPandaFoodUnit = document.getElementById("pandaFoodUnit");
+  const pandaFoodList = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
+  const pandaFoodPrice = [0.11, 0.22, 0.6, 1, 4, 12]
+  const pandaFoodUnit = [1, 5, 10, 20]
+  pandaFoodList.forEach(element => {
+  	let option = document.createElement("OPTION");
+  	option.innerHTML = element;
+  	option.value = element;
+  	dropdownlistPandaFoodList.options.add(option);
+  });
+  
+  pandaFoodUnit.forEach(element => {
+  	let option = document.createElement("OPTION");
+  	option.innerHTML = element;
+  	option.value = element;
+  	dropdownlistPandaFoodUnit.options.add(option);
+  });
+  
+  // GET TOKEN https://api.waxsweden.org/v2/state/get_account?account=
   // END
 
   const { TaskTimer } = tasktimer;
@@ -432,6 +455,39 @@
     }
     return result.rows[0];
   }
+  
+  async function pandaBuyFood(){
+  	const foodRarity = dropdownlistPandaFoodList.options[dropdownlistPandaFoodList.selectedIndex].text;
+  	const foodAmount = dropdownlistPandaFoodUnit.options[dropdownlistPandaFoodUnit.selectedIndex].text;
+  	const foodPrice = pandaFoodPrice[dropdownlistPandaFoodList.selectedIndex];
+  	
+  	const _quantity = `${parseFloat(foodAmount*foodPrice).toFixed(4)} BAM`;
+  	const _memo = `buyeat ${foodRarity} ${foodAmount} `;
+  	
+  	let config = {
+              actions: [{
+                account: 'nftpandabamb',
+                name: 'transfer',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  from: wax.userAccount,
+                  to: "nftpandawofg",
+                  quantity: _quantity,
+                  memo: _memo
+                },
+              }]
+            };
+    let ret = await sign(config);
+    if (ret == true){
+        console.log(`BUY PANDA FOOD DONE!`);
+    }
+    else { 
+        console.log(`BUY PANDA FOOD FAILED`);
+    }
+  }
 
   async function getPanda(){
     
@@ -442,7 +498,7 @@
     let BAM = await fetch("https://wax.alcor.exchange/api/markets/155");
     BAM = await BAM.json();
 
-    let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner="+wax.userAccount+"&page=1&limit=100&order=desc&sort=asset_id");
+    let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner="+wax.userAccount+"&page=1&limit=1000&order=desc&sort=asset_id");
     let FoodID = await jsonFood.json();
     document.getElementById('pandaBalance').innerHTML =  "Food remain : " + Object.keys(FoodID.data).length + "ea";
 
@@ -694,4 +750,3 @@
 </script>
 </body>
 </html>
-\
