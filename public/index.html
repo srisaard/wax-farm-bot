@@ -258,7 +258,7 @@
     const food = resource.food;
     const water = resource.water;
     const currency = await getTableRows("farminggames", "wallet", wax.userAccount);
-    document.getElementById('ftBalance').innerHTML = `FOOD: ${food}, WATER: ${water}, ${parseFloat(currency.balances[0].value/1000).toFixed(2)} ${currency.balances[0].key}, ${parseFloat(currency.balances[1].value/1000).toFixed(2)} ${currency.balances[1].key}`;
+    document.getElementById('ftBalance').innerHTML = `FOOD: ${food}, WATER: ${water}, ${parseFloat(currency.balances[0].value/10000).toFixed(2)} ${currency.balances[0].key}, ${parseFloat(currency.balances[1].value/10000).toFixed(2)} ${currency.balances[1].key}`;
     console.log(currency);
     let refill = true;
     let asset_id;
