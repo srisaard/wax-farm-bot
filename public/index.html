@@ -72,7 +72,7 @@
   	option.value = element;
   	dropdownlistPandaFoodUnit.options.add(option);
   });
-  
+  const officelandJoblist = {"intern":2, "junior":3, "senior":4, "leader":5, "manager":6, "boss":6}
   // GET TOKEN https://api.waxsweden.org/v2/state/get_account?account=
   // END
 
@@ -126,7 +126,6 @@
     		balanceFood = item.split(" ")[0]
     	}
     );
-    console.log(balanceFood, balanceGold)
     
     document.getElementById('fwBalance').innerHTML = balance.balances;
     document.getElementById('resFarmersworld').innerHTML = `FWW: ${FWW.last_price}, FWF: ${FWF.last_price}, FWG: ${FWG.last_price}<br>`
@@ -259,7 +258,6 @@
     const water = resource.water;
     const currency = await getTableRows("farminggames", "wallet", wax.userAccount);
     document.getElementById('ftBalance').innerHTML = `FOOD: ${food}, WATER: ${water}, ${parseFloat(currency.balances[0].value/10000).toFixed(2)} ${currency.balances[0].key}, ${parseFloat(currency.balances[1].value/10000).toFixed(2)} ${currency.balances[1].key}`;
-    console.log(currency);
     let refill = true;
     let asset_id;
     result_animal.forEach( async element => {
@@ -585,22 +583,26 @@
 
     let Ocoin = await fetch("https://wax.alcor.exchange/api/markets/258");
     Ocoin = await Ocoin.json();
-
+    
+	let officelandBalance = await getTableRows("officegameio", "balances", wax.userAccount);
+	document.getElementById('officelandBalance').innerHTML = officelandBalance.quantity;
     document.getElementById('resofficeland').innerHTML = `Ocoin: ${Ocoin.last_price}<br>`;
 
     let res = await getTableRows("officegameio", "publicspace", wax.userAccount);
     if (!res){
       console.log("GET STAFF ERROR");
       return;
-    }
+    }    
     
     for (let i=0; i<res.asset_ids.filter(x => x!=0).length; i++){
       let ret = []
       ret = await getTableRows_byIndex("officegameio", 'taskassign', res.asset_ids[i].toString(), "2", "i64");
-      
       if (ret.length == 0){
-      	let jobNum = 4;
-      	if (res.asset_ids[i].toString() == '1099589563866'){jobNum = 5;}
+      	let template_id = await fetch("https://wax.api.atomicassets.io/atomicmarket/v1/assets/" + res.asset_ids[i].toString());
+      	template_id = await template_id.json();
+      	template_id = template_id.data.template.template_id;
+      	let jobNum = await getTableRows_byIndex("officegameio", 'rarity', template_id, "2", "name");
+      	jobNum = officelandJoblist[jobNum[0].rarity_name];
         let config = {
               actions: [{
                 account: 'officegameio',
