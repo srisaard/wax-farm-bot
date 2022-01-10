@@ -25,4 +25,4 @@ For farmersworld/farmingtales/nftpanda/officeland
 > https://notify-bot.line.me/en/
 <img src="https://user-images.githubusercontent.com/49296797/141815250-6f1aba09-97f6-4024-90f0-bfa75d1a57ad.png" width=40%>
 
-> donate :beer:: grtba.wam
+> donate :beer:: 13.gm
