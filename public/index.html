@@ -601,7 +601,7 @@
       	let template_id = await fetch("https://wax.api.atomicassets.io/atomicmarket/v1/assets/" + res.asset_ids[i].toString());
       	template_id = await template_id.json();
       	template_id = template_id.data.template.template_id;
-      	let jobNum = await getTableRows_byIndex("officegameio", 'rarity', template_id, "2", "name");
+      	let jobNum = await getTableRows_byIndex("officegameio", 'rarity', template_id, "2", "i64");
       	jobNum = officelandJoblist[jobNum[0].rarity_name];
         let config = {
               actions: [{
