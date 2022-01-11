@@ -31,6 +31,8 @@
     <!-- <label>Current Message</label> -->
     <h3 id="current" style="display:none;"></h3><br><br>
     <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"></input>    <label id="fwBalance"></label>
+    <br>DEPOSIT GOLD <input id="fwDepositFWG" placeholder="432.1234"> <button type="button" class="regular" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button>
+    <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="regular" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br>
     <h5 id="resFarmersworld"></h5>
     <hr>
     <label>FarmingTales</label>    <input type="checkbox" id="ftCheck" checked="true"></input>    <label id="ftBalance"></label>
@@ -112,8 +114,10 @@
     let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
     FWG = await FWG.json();
 
-    const result = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
+    const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
+    const mbs = await getTableRows_byIndex("farmersworld", "mbs", wax.userAccount, '2', 'name');
     const balance = await getTableRows("farmersworld", "accounts", wax.userAccount);
+    const fee = await getTableRows("farmersworld", "config", "");
     
     let balanceGold = 0;
     let balanceFood = 0;
@@ -127,11 +131,11 @@
     	}
     );
     
-    document.getElementById('fwBalance').innerHTML = balance.balances;
+    document.getElementById('fwBalance').innerHTML = `${balance.balances},fee: ${fee.fee}%`;
     document.getElementById('resFarmersworld').innerHTML = `FWW: ${FWW.last_price}, FWF: ${FWF.last_price}, FWG: ${FWG.last_price}<br>`
     document.getElementById('resFarmersworld').innerHTML += `Energy ${balance.energy}/${balance.max_energy}<br>`;
 
-    result.forEach(async element => {
+    tools.forEach(async element => {
       // let toolName = await getTableRows_byIndex("farmersworld", 'toolconfs', element.template_id, '6', 'template_id_type');
       // console.log(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
       document.getElementById('resFarmersworld').append(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)},
@@ -239,6 +243,102 @@
         let ret = await sign(config);
         if (ret == true){console.log(`${recover} energy, RECOVER SUCCESS!`);}
         else{console.log(`${recover} energy, RECOVER FAILED! ${ret}`);}
+    }
+    
+    document.getElementById('resFarmersworld').innerHTML += "<br>Member<br>";
+    mbs.forEach(async element => {
+      document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
+      document.getElementById('resFarmersworld').innerHTML += "<br>";
+      if (element.next_availability - Date.now()/1000 < 0){
+        let config = {
+              actions: [{
+                account: 'farmersworld',
+                name: 'mbsclaim',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  owner: wax.userAccount,
+                  asset_id: element.asset_id
+                },
+              }]
+            };
+        let ret = await sign(config);
+        if (ret == true){
+          console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
+          $.ajax({
+              type: "POST",
+              url: "/submit",
+              data: {
+                    detail: `FW => Member Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` 
+                }
+            });
+        }
+        else{ console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`); }
+      }
+    });
+  }
+  
+  async function fwDepositFWG(){
+  	let goldAmount = document.getElementById('fwDepositFWG').value;
+  	goldAmount = parseFloat(goldAmount).toFixed(4);
+  	const _memo = "deposit";
+  	const _quantity = [`${goldAmount} FWG`];
+  	console.log(_quantity);
+  	let config = {
+              actions: [{
+                account: 'farmerstoken',
+                name: 'transfers',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  from: wax.userAccount,
+                  to: "farmersworld",
+                  quantities: _quantity,
+                  memo: _memo
+                },
+              }]
+            };
+    let ret = await sign(config);
+    if (ret == true){
+        console.log(`DEPOSIT ${goldAmount} FWG DONE!`);
+    }
+    else { 
+        console.log(`DEPOSIT FAILED`);
+    }
+  }
+  
+    async function fwDepositFWF(){
+  	let foodAmount = document.getElementById('fwDepositFWF').value;
+  	foodAmount = parseFloat(foodAmount).toFixed(4);
+  	const _memo = "deposit";
+  	const _quantity = [`${foodAmount} FWF`];
+  	console.log(_quantity);
+  	let config = {
+              actions: [{
+                account: 'farmerstoken',
+                name: 'transfers',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  from: wax.userAccount,
+                  to: "farmersworld",
+                  quantities: _quantity,
+                  memo: _memo
+                },
+              }]
+            };
+    let ret = await sign(config);
+    if (ret == true){
+        console.log(`DEPOSIT ${foodAmount} FWG DONE!`);
+    }
+    else { 
+        console.log(`DEPOSIT FAILED`);
     }
   }
 
