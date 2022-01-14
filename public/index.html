@@ -53,7 +53,7 @@
   // Common param
   const nftPandaFEED = 3500;
   const fwRepair = 30;
-  const fwRecover = 30;
+  const fwRecover = 100;
   
   
   const dropdownlistPandaFoodList = document.getElementById("pandaFoodList");
@@ -98,7 +98,8 @@
     }
   }
 
-  async function Farmersworld_getTools() {
+//////////////////////////////////FARMERSWORLD///////////////////////
+  async function Farmersworld_main() {
     let price = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD");
     let priceJson = await price.json();
     document.getElementById("waxusd").innerHTML = "WAX/USD : " + priceJson.wax.usd;
@@ -114,8 +115,6 @@
     let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
     FWG = await FWG.json();
 
-    const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
-    const mbs = await getTableRows_byIndex("farmersworld", "mbs", wax.userAccount, '2', 'name');
     const balance = await getTableRows("farmersworld", "accounts", wax.userAccount);
     const fee = await getTableRows("farmersworld", "config", "");
     
@@ -134,8 +133,120 @@
     document.getElementById('fwBalance').innerHTML = `${balance.balances},fee: ${fee.fee}%`;
     document.getElementById('resFarmersworld').innerHTML = `FWW: ${FWW.last_price}, FWF: ${FWF.last_price}, FWG: ${FWG.last_price}<br>`
     document.getElementById('resFarmersworld').innerHTML += `Energy ${balance.energy}/${balance.max_energy}<br>`;
-
-    tools.forEach(async element => {
+    await fwTools(balanceGold);
+    
+    document.getElementById('resFarmersworld').innerHTML += "<br>Member<br>";
+    await fwMembers();
+    
+    document.getElementById('resFarmersworld').innerHTML += "<br>FarmPlot<br>";
+    await fwCrops();
+    
+    if (balance.energy < fwRecover)
+    {
+      let recover = balanceFood * 5;
+      if (recover == 0)
+      {
+        $.ajax({
+            type: "POST",
+            url: "/submit",
+            data: {
+                  detail: `FW => Need more 🐟\n ${balanceFood} remains!\n` +
+                  `Energy ${balance.energy}/${balance.max_energy}` 
+              }
+          });
+          return;
+      }
+      if (recover > balance.max_energy) recover = balance.max_energy - balance.energy;
+      let config = {
+              actions: [{
+                account: 'farmersworld',
+                name: 'recover',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  owner: wax.userAccount,
+                  energy_recovered: recover
+                },
+              }]
+            };
+        let ret = await sign(config);
+        if (ret == true){console.log(`${recover} energy, RECOVER SUCCESS!`);}
+        else{console.log(`${recover} energy, RECOVER FAILED! ${ret}`);}
+    }
+  }
+  
+  async function fwMembers(){
+      const mbs = await getTableRows_byIndex("farmersworld", "mbs", wax.userAccount, '2', 'name');
+      mbs.forEach(async element => {
+      document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
+      document.getElementById('resFarmersworld').innerHTML += "<br>";
+      if (element.next_availability - Date.now()/1000 < 0){
+        let config = {
+              actions: [{
+                account: 'farmersworld',
+                name: 'mbsclaim',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  owner: wax.userAccount,
+                  asset_id: element.asset_id
+                },
+              }]
+            };
+        let ret = await sign(config);
+        if (ret == true){
+          console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
+          $.ajax({
+              type: "POST",
+              url: "/submit",
+              data: {
+                    detail: `FW => Member Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` 
+                }
+            });
+        }
+        else{ console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`); }
+      }
+    });
+  }
+  
+  async function fwCrops(){
+  	  const crops = await getTableRows_byIndex("farmersworld", "crops", wax.userAccount, '2', 'name');
+  	  crops.forEach(async element => {
+  	  	document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, claimed ${element.times_claimed}/42, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
+  	  	document.getElementById('resFarmersworld').innerHTML += "<br>";
+  	  	if (element.next_availability - Date.now()/1000 < 0){
+        let config = {
+              actions: [{
+                account: 'farmersworld',
+                name: 'cropclaim',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  owner: wax.userAccount,
+                  crop_id: element.asset_id
+                },
+              }]
+            };
+        let ret = await sign(config);
+		if (ret == true){
+			console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
+        }
+        else{
+			console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`);
+		}
+      }
+  	});
+  }
+  
+  async function fwTools(balanceGold){
+      const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
+  	  tools.forEach(async element => {
       // let toolName = await getTableRows_byIndex("farmersworld", 'toolconfs', element.template_id, '6', 'template_id_type');
       // console.log(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
       document.getElementById('resFarmersworld').append(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)},
@@ -206,77 +317,6 @@
         if (ret == true){console.log(`Id ${ element.asset_id}, REPAIR SUCCESS!`);}
         else{console.log(`Id ${ element.asset_id}, REPAIR FAILED! ${ret}`);}
       }
-
-
-    });
-
-    if (balance.energy < fwRecover)
-    {
-      let recover = balanceFood * 5;
-      if (recover == 0)
-      {
-        $.ajax({
-            type: "POST",
-            url: "/submit",
-            data: {
-                  detail: `FW => Need more 🐟\n ${balanceFood} remains!\n` +
-                  `Energy ${balance.energy}/${balance.max_energy}` 
-              }
-          });
-          return;
-      }
-      if (recover > balance.max_energy) recover = balance.max_energy - balance.energy;
-      let config = {
-              actions: [{
-                account: 'farmersworld',
-                name: 'recover',
-                authorization: [{
-                  actor: wax.userAccount,
-                  permission: 'active',
-                }],
-                data: {
-                  owner: wax.userAccount,
-                  energy_recovered: recover
-                },
-              }]
-            };
-        let ret = await sign(config);
-        if (ret == true){console.log(`${recover} energy, RECOVER SUCCESS!`);}
-        else{console.log(`${recover} energy, RECOVER FAILED! ${ret}`);}
-    }
-    
-    document.getElementById('resFarmersworld').innerHTML += "<br>Member<br>";
-    mbs.forEach(async element => {
-      document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
-      document.getElementById('resFarmersworld').innerHTML += "<br>";
-      if (element.next_availability - Date.now()/1000 < 0){
-        let config = {
-              actions: [{
-                account: 'farmersworld',
-                name: 'mbsclaim',
-                authorization: [{
-                  actor: wax.userAccount,
-                  permission: 'active',
-                }],
-                data: {
-                  owner: wax.userAccount,
-                  asset_id: element.asset_id
-                },
-              }]
-            };
-        let ret = await sign(config);
-        if (ret == true){
-          console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
-          $.ajax({
-              type: "POST",
-              url: "/submit",
-              data: {
-                    detail: `FW => Member Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` 
-                }
-            });
-        }
-        else{ console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`); }
-      }
     });
   }
   
@@ -341,7 +381,7 @@
         console.log(`DEPOSIT FAILED`);
     }
   }
-
+//////////////////////////////////FARMERSWORLD///////////////////////
   async function Farmingtales() {
     if (!document.getElementById("ftCheck").checked){
       return;
@@ -811,7 +851,7 @@
       callback(task) {
           // timerlogin.reset();
           console.log(`${task.id} task has run ${task.currentRuns} times.`);
-          Farmersworld_getTools();
+          Farmersworld_main();
       }
     },
     {
