@@ -50,53 +50,57 @@
 </div>
 <button type="button" class="regular" name="edit" id="submit" style="display:none;"></button>
 <script>
-  // Common param
-  const nftPandaFEED = 3500;
-  const fwRepair = 30;
-  const fwRecover = 100;
-  
-  
-  const dropdownlistPandaFoodList = document.getElementById("pandaFoodList");
-  const dropdownlistPandaFoodUnit = document.getElementById("pandaFoodUnit");
-  const pandaFoodList = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
-  const pandaFoodPrice = [0.11, 0.22, 0.6, 1, 4, 12]
-  const pandaFoodUnit = [1, 5, 10, 20]
-  pandaFoodList.forEach(element => {
-  	let option = document.createElement("OPTION");
-  	option.innerHTML = element;
-  	option.value = element;
-  	dropdownlistPandaFoodList.options.add(option);
-  });
-  
-  pandaFoodUnit.forEach(element => {
-  	let option = document.createElement("OPTION");
-  	option.innerHTML = element;
-  	option.value = element;
-  	dropdownlistPandaFoodUnit.options.add(option);
-  });
-  const officelandJoblist = {"intern":2, "junior":3, "senior":4, "leader":5, "manager":6, "boss":6}
-  // GET TOKEN https://api.waxsweden.org/v2/state/get_account?account=
-  // END
+	// Common param
+	const { TaskTimer } = tasktimer;
+	const wax = new waxjs.WaxJS({
+		rpcEndpoint: 'https://api.waxsweden.org', // // 'https://wax.pink.gg', 
+		tryAutoLogin: true,
+		waxSigningURL: "https://all-access.wax.io",
+		waxAutoSigningURL: "https://api-idm.wax.io/v1/accounts/auto-accept/"
+	});
+	
+	const nftPandaFEED = 3500;
+	const fwRepair = 30;
+	const fwRecover = 100;
+	let toolconf;
+	let cropconf;
+	let mbconf;
 
-  const { TaskTimer } = tasktimer;
-  const wax = new waxjs.WaxJS({
-    rpcEndpoint: 'https://api.waxsweden.org', // // 'https://wax.pink.gg', 
-    tryAutoLogin: true,
-    waxSigningURL: "https://all-access.wax.io",
-    waxAutoSigningURL: "https://api-idm.wax.io/v1/accounts/auto-accept/"
-  });
-  
+	const dropdownlistPandaFoodList = document.getElementById("pandaFoodList");
+	const dropdownlistPandaFoodUnit = document.getElementById("pandaFoodUnit");
+	const pandaFoodList = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
+	const pandaFoodPrice = [0.11, 0.22, 0.6, 1, 4, 12]
+	const pandaFoodUnit = [1, 5, 10, 20]
+	pandaFoodList.forEach(element => {
+	let option = document.createElement("OPTION");
+	option.innerHTML = element;
+	option.value = element;
+	dropdownlistPandaFoodList.options.add(option);
+	});
 
-  async function login() {
-    try {
-      const userAccount = await wax.login();
-      document.getElementById('updater').value = userAccount;
-      await getCurrentMessage();
-      console.log("LOGIN SUCCESS!");
-    } catch(e) {
-      document.getElementById('response').append(e.message);
-    }
-  }
+	pandaFoodUnit.forEach(element => {
+	let option = document.createElement("OPTION");
+	option.innerHTML = element;
+	option.value = element;
+	dropdownlistPandaFoodUnit.options.add(option);
+	});
+	const officelandJoblist = {"intern":2, "junior":3, "senior":4, "leader":5, "manager":6, "boss":6}
+	// GET TOKEN https://api.waxsweden.org/v2/state/get_account?account=
+	// END  
+
+	async function login() {
+		try {
+			const userAccount = await wax.login();
+			document.getElementById('updater').value = userAccount;
+			await getCurrentMessage();
+			console.log("LOGIN SUCCESS!");
+			toolconf = await getTableAll("farmersworld", "toolconfs", 100);
+			cropconf = await getTableAll("farmersworld", "cropconf", 100);
+			mbconf = await getTableAll("farmersworld", "mbsconf", 100);
+		} catch(e) {
+			document.getElementById('response').append(e.message);
+		}
+	}
 
 //////////////////////////////////FARMERSWORLD///////////////////////
   async function Farmersworld_main() {
@@ -130,7 +134,7 @@
     	}
     );
     
-    document.getElementById('fwBalance').innerHTML = `${balance.balances},fee: ${fee.fee}%`;
+    document.getElementById('fwBalance').innerHTML = `${balance.balances},<div class="badge d-inline bg-primary text-white">fee: ${fee.fee}%</div>`;
     document.getElementById('resFarmersworld').innerHTML = `FWW: ${FWW.last_price}, FWF: ${FWF.last_price}, FWG: ${FWG.last_price}<br>`
     document.getElementById('resFarmersworld').innerHTML += `Energy ${balance.energy}/${balance.max_energy}<br>`;
     await fwTools(balanceGold);
@@ -177,11 +181,28 @@
     }
   }
   
-  async function fwMembers(){
-      const mbs = await getTableRows_byIndex("farmersworld", "mbs", wax.userAccount, '2', 'name');
-      mbs.forEach(async element => {
-      document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
-      document.getElementById('resFarmersworld').innerHTML += "<br>";
+	async function fwMembers(){
+		const mbs = await getTableRows_byIndex("farmersworld", "mbs", wax.userAccount, '2', 'name');
+		mbs.forEach(async element => {
+			const mbName = mbconf.rows.find(elem => elem.template_id === element.template_id);
+			let color;
+			if (mbName.type === "Food")
+			{
+				color = "bg-primary";
+			}
+			else if (mbName.type === "Wood")
+			{
+				color = "bg-success";
+			}
+			else
+			{
+				color = "bg-warning";
+			}
+			document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
+						<div class="badge bg-light" style="width: 130px;">${mbName.name}</div>&emsp;
+						<div class="badge ${color} text-white" style="width: 120px;">${mbName.type}</div>&emsp;
+						<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
+					</div><br>`;
       if (element.next_availability - Date.now()/1000 < 0){
         let config = {
               actions: [{
@@ -213,45 +234,65 @@
     });
   }
   
-  async function fwCrops(){
-  	  const crops = await getTableRows_byIndex("farmersworld", "crops", wax.userAccount, '2', 'name');
-  	  crops.forEach(async element => {
-  	  	document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, claimed ${element.times_claimed}/42, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
-  	  	document.getElementById('resFarmersworld').innerHTML += "<br>";
-  	  	if (element.next_availability - Date.now()/1000 < 0){
-        let config = {
-              actions: [{
-                account: 'farmersworld',
-                name: 'cropclaim',
-                authorization: [{
-                  actor: wax.userAccount,
-                  permission: 'active',
-                }],
-                data: {
-                  owner: wax.userAccount,
-                  crop_id: element.asset_id
-                },
-              }]
-            };
-        let ret = await sign(config);
-		if (ret == true){
-			console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
-        }
-        else{
-			console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`);
-		}
-      }
+	async function fwCrops(){
+		const crops = await getTableRows_byIndex("farmersworld", "crops", wax.userAccount, '2', 'name');
+		crops.forEach(async element => {
+		  	const cropName = cropconf.rows.find(elem => elem.template_id === element.template_id);
+			//document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, claimed ${element.times_claimed}/42, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
+			document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
+					<div class="badge bg-warning text-dark" style="width: 130px;">${cropName.name}</div>&emsp;
+					<div class="badge bg-secondary text-white" style="width: 120px;">${element.times_claimed}/42</div>&emsp;
+					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
+				</div><br>`;
+			if (element.next_availability - Date.now()/1000 < 0){
+				let config = {
+					  actions: [{
+						account: 'farmersworld',
+						name: 'cropclaim',
+						authorization: [{
+						  actor: wax.userAccount,
+						  permission: 'active',
+						}],
+						data: {
+						  owner: wax.userAccount,
+						  crop_id: element.asset_id
+						},
+					  }]
+					};
+				let ret = await sign(config);
+				if (ret == true){
+					console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
+				}
+				else{
+					console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`);
+				}
+      		}
   	});
   }
   
-  async function fwTools(balanceGold){
-      const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
-  	  tools.forEach(async element => {
-      // let toolName = await getTableRows_byIndex("farmersworld", 'toolconfs', element.template_id, '6', 'template_id_type');
-      // console.log(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
-      document.getElementById('resFarmersworld').append(`Id ${ element.asset_id}, next_harvest ${sec2time(element.next_availability - Date.now()/1000)},
-        current_durability: ${element.current_durability}/${element.durability}`);
-      document.getElementById('resFarmersworld').innerHTML += "<br>";
+	async function fwTools(balanceGold){
+		const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
+		tools.forEach(async element => {
+			const toolName = toolconf.rows.find(elem => elem.template_id === element.template_id);
+			let color;
+			if (toolName.type === "Food")
+			{
+				color = "bg-primary";
+			}
+			else if (toolName.type === "Wood")
+			{
+				color = "bg-success";
+			}
+			else
+			{
+				color = "bg-warning";
+			}
+			document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
+					<div class="badge ${color} text-white" style="width: 130px;">${toolName.template_name}</div>&emsp;
+					<div class="badge bg-secondary text-white" style="width: 120px;">${element.current_durability}/${element.durability}</div>&emsp;
+					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
+				</div><br>`;
+			
       if (element.next_availability - Date.now()/1000 < 0){
         let config = {
               actions: [{
@@ -595,6 +636,27 @@
     }
     return result.rows[0];
   }
+	
+	async function getTableAll(code, tableName, limit=100){
+		let result;
+		try {
+		  result = await wax.api.rpc.get_table_rows({
+			json: true,               // Get the response as json
+			code: code,      // Contract that we target
+			scope: code,         // Account that owns the data
+			table: tableName,        // Table name
+			lower_bound: "",
+			upper_bound: "",
+			limit: limit,                // Maximum number of rows that we want to get
+			reverse: false,           // Optional: Get reversed data
+			show_payer: false          // Optional: Show ram payer
+		});
+		} catch(e) {
+		  document.getElementById('response').append(e.message);
+		  console.log("ERROR FOR: " + code + ", " + tableName);
+		}
+		return result;
+	  }
   
   async function pandaBuyFood(){
   	const foodRarity = dropdownlistPandaFoodList.options[dropdownlistPandaFoodList.selectedIndex].text;
@@ -827,10 +889,10 @@
 // --------------------------------------------Run at init---------------------------------------//
   // set a random value to the initial message value
   document.getElementById('message').value = Math.random().toString(36).substring(2);
-  login();
+  login(); // get onetime table
 
-  const count = 10;
-  const timerMain = new TaskTimer(1000);
+	const count = 10;
+	const timerMain = new TaskTimer(1000);
   timerMain.add([
     {
       id: 'FarmingTales',       // unique ID of the task
@@ -846,7 +908,7 @@
     {
       id: 'FarmersWorld',       // unique ID of the task
       // tickDelay: 1,       // 1 tick delay before first run
-      tickInterval: 45,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 15,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
@@ -887,8 +949,8 @@
     minutes = Math.floor(time / 60) % 60,
     seconds = Math.floor(time - minutes * 60),
     milliseconds = time.slice(-3);
-
-    return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2) + ',' + pad(milliseconds, 3);
+	return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
+    //return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2) + ',' + pad(milliseconds, 3);
   }
 
 </script>
