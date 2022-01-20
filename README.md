@@ -10,9 +10,9 @@ For farmersworld/farmingtales/nftpanda/officeland
 3. Input your line token to .env file
 > TOKEN=uaIASUeuqieuiHAIHFHDAIFNKjdankfJ
 4. run
-> <img src="https://user-images.githubusercontent.com/49296797/149676211-a0e27305-7fbc-498e-8f77-795f7ad2280e.png" width=70%>
+<img src="https://user-images.githubusercontent.com/49296797/149676211-a0e27305-7fbc-498e-8f77-795f7ad2280e.png" width=70%>
 
-> <br>node .
+> node .
 5. open browser and go to
 > http://localhost:6969/
 
