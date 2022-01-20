@@ -27,7 +27,7 @@ For farmersworld/farmingtales/nftpanda/officeland
 > https://notify-bot.line.me/en/
 <img src="https://user-images.githubusercontent.com/49296797/141815250-6f1aba09-97f6-4024-90f0-bfa75d1a57ad.png" width=40%>
 <br><hr>
-CHANGELOG
-=> 220120
-    - Show CPU usage
-    - Update UI
+<h1>CHANGELOG</h1>
+<h3>=>&nbsp;220120</h3>
+<h5>&emsp;- Show CPU usage</h5>
+<h5>&emsp;- Update UI</h5>
