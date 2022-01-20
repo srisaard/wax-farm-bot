@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/x-icon" href="/js/favicon.ico">
   <script src='/js/waxjs.js'></script>
   <script src="/js/tasktimer.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -15,6 +16,12 @@
   </script>
 </head>
 <body>
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-5-strong">
+    <ul class="nav navbar-nav nav-flex ml-auto">
+      <li class="nav-item" style="display: none;"></li>
+      <li class="nav-item"><span id="waxusd" style="background-color: green; color: honeydew;"></span></li>
+    </ul>
+  </nav>
   <div class="container">
 
     <h1>SIMPLE Farming bot</h1>
@@ -27,9 +34,10 @@
     <!-- <label>fail:</label> -->
     <input type="checkbox" id="fail" value="fail" style="display:none;"><t>
     <button id="sign" onclick=sign() >Sign transaction</button><br><br>
-    <h2 id="waxusd"></h2>
+    <h5 id="usage"></h5>
     <!-- <label>Current Message</label> -->
-    <h3 id="current" style="display:none;"></h3><br><br>
+    <h3 id="current" style="display:none;"></h3><br>
+    <hr>
     <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"></input>    <label id="fwBalance"></label>
     <br>DEPOSIT GOLD <input id="fwDepositFWG" placeholder="432.1234"> <button type="button" class="regular" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button>
     <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="regular" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br>
@@ -42,7 +50,7 @@
     <br><select id = "pandaFoodUnit"></select> <select id = "pandaFoodList"></select>  <button type="button" class="regular" onclick=pandaBuyFood() id="pandaBuyFoodButton">Buy</button>
     <h5 id="resnftPanda"></h5>
     <hr>
-    <label>officeland</label>    <input type="checkbox" id="officelandCheck" checked="true"></input>    <label id="officelandBalance"></label>
+    <label>Officeland</label>    <input type="checkbox" id="officelandCheck" checked="true"></input>    <label id="officelandBalance"></label>
     <h5 id="resofficeland"></h5>
     <hr>
     <label>Transaction Results</label>
@@ -59,7 +67,12 @@
 		waxAutoSigningURL: "https://api-idm.wax.io/v1/accounts/auto-accept/"
 	});
 	
-	const nftPandaFEED = 3500;
+	const fwToolsColor = {"Wood": "Sienna", "Food": "DodgerBlue", "Gold": "Gold"};
+	const fwMembersColor = {"Bronze Member": "Khaki", "Silver Member": "Silver", "Gold Member": "Yellow"};
+	const nftPandaColor = {"earth": "Sienna", "water": "DodgerBlue", "fire": "Crimson", "wind": "MediumSeaGreen"};
+  const nftPandaWeapon = {"0": "Common", "1": "Uncommon", "2": "Rare", 
+                          "3": "Epic", "4": "Legendary", "5": "Mythic"};
+  const nftPandaFEED = 3500;
 	const fwRepair = 30;
 	const fwRecover = 100;
 	let toolconf;
@@ -68,9 +81,9 @@
 
 	const dropdownlistPandaFoodList = document.getElementById("pandaFoodList");
 	const dropdownlistPandaFoodUnit = document.getElementById("pandaFoodUnit");
-	const pandaFoodList = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
-	const pandaFoodPrice = [0.11, 0.22, 0.6, 1, 4, 12]
-	const pandaFoodUnit = [1, 5, 10, 20]
+	const pandaFoodList = ["common", "uncommon", "rare", "epic", "legendary", "mythic"];
+	const pandaFoodPrice = [0.11, 0.22, 0.6, 1, 4, 12];
+	const pandaFoodUnit = [1, 5, 10, 20];
 	pandaFoodList.forEach(element => {
 	let option = document.createElement("OPTION");
 	option.innerHTML = element;
@@ -84,7 +97,10 @@
 	option.value = element;
 	dropdownlistPandaFoodUnit.options.add(option);
 	});
-	const officelandJoblist = {"intern":2, "junior":3, "senior":4, "leader":5, "manager":6, "boss":6}
+	const officelandJoblist = {"intern":2, "junior":3, "senior":4, "leader":5, "manager":6, "boss":6};
+	const officelandColor = {"intern":"Silver", "junior":"MediumSeaGreen", 
+                          "senior":"Gold", "leader":"MediumOrchid",
+                          "manager":"OrangeRed", "boss":"DarkSlateBlue"};
 	// GET TOKEN https://api.waxsweden.org/v2/state/get_account?account=
 	// END  
 
@@ -97,54 +113,78 @@
 			toolconf = await getTableAll("farmersworld", "toolconfs", 100);
 			cropconf = await getTableAll("farmersworld", "cropconf", 100);
 			mbconf = await getTableAll("farmersworld", "mbsconf", 100);
-		} catch(e) {
+      await getUsage();
+      document.getElementById("waxusd").innerHTML = "₩";
+    } catch(e) {
 			document.getElementById('response').append(e.message);
 		}
 	}
 
-//////////////////////////////////FARMERSWORLD///////////////////////
-  async function Farmersworld_main() {
-    let price = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD");
-    let priceJson = await price.json();
-    document.getElementById("waxusd").innerHTML = "WAX/USD : " + priceJson.wax.usd;
+  async function getUsage(){
+    const get_account = await fetch("https://api.waxsweden.org/v2/state/get_account?account="+wax.userAccount).then(response => response.json());
+    const cpuUsage = Math.floor(100*get_account.account.cpu_limit.used/get_account.account.cpu_limit.max);
+    const waxInWallet = get_account.account.core_liquid_balance.split(" ")[0];
+    let sInnerHTML = `<div class="progress" style="height: 25px; width: 75%; background-color: Silver;">
+        <div class="badge d-inline bg-secondary text-white" style="font-size: medium;">${parseFloat(waxInWallet).toFixed(2)} WAX</div>&nbsp;
+        <div class="progress-bar" role="progressbar" aria-valuemin="0"
+          aria-valuemax="100" aria-valuenow="${cpuUsage}" style="width-max: 100%; width: ${cpuUsage*0.75}%;
+          background-color: rgb(0, 0, 205); font-size: medium;"><b>CPU: ${cpuUsage}%</b></div>
+      </div>`;
+    document.getElementById("usage").innerHTML = sInnerHTML;
+  }
 
+//////////////////////////////////GOTOFARMERSWORLD///////////////////////
+  async function Farmersworld_main() {
     if (!document.getElementById("fwCheck").checked){
       return;
     }
     
-    let FWW = await fetch("https://wax.alcor.exchange/api/markets/104");
-    FWW = await FWW.json();
-    let FWF = await fetch("https://wax.alcor.exchange/api/markets/105");
-    FWF = await FWF.json();
-    let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
-    FWG = await FWG.json();
+    // let FWW = await fetch("https://wax.alcor.exchange/api/markets/104");
+    // FWW = await FWW.json();
+    // let FWF = await fetch("https://wax.alcor.exchange/api/markets/105");
+    // FWF = await FWF.json();
+    // let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
+    // FWG = await FWG.json();
 
     const balance = await getTableRows("farmersworld", "accounts", wax.userAccount);
     const fee = await getTableRows("farmersworld", "config", "");
     
     let balanceGold = 0;
     let balanceFood = 0;
+    let balanceWood = 0;
     balance.balances.forEach(item => {
     	if (item.includes("GOLD")) 
-    	{
-    		balanceGold = item.split(" ")[0]
-    	}
+    		balanceGold = item.split(" ")[0];
     	else if(item.includes("FOOD"))
-    		balanceFood = item.split(" ")[0]
+    		balanceFood = item.split(" ")[0];
+    	else if(item.includes("WOOD"))
+    		balanceWood = item.split(" ")[0];
     	}
     );
+
+    // document.getElementById('fwBalance').innerHTML = `${balance.balances},<div class="badge d-inline bg-primary text-white">fee: ${fee.fee}%</div>`;
     
-    document.getElementById('fwBalance').innerHTML = `${balance.balances},<div class="badge d-inline bg-primary text-white">fee: ${fee.fee}%</div>`;
-    document.getElementById('resFarmersworld').innerHTML = `FWW: ${FWW.last_price}, FWF: ${FWF.last_price}, FWG: ${FWG.last_price}<br>`
-    document.getElementById('resFarmersworld').innerHTML += `Energy ${balance.energy}/${balance.max_energy}<br>`;
-    await fwTools(balanceGold);
+    let sInnerHTML = "";
+    sInnerHTML += `<img src="/js/FWW.png"></img> ${parseFloat(balanceWood).toFixed(2)},&nbsp; 
+		<img src="/js/FWF.png"></img> ${parseFloat(balanceFood).toFixed(2)},&nbsp;<img src="/js/FWG.png"></img> ${parseFloat(balanceGold).toFixed(2)}<br>`;
+    sInnerHTML += `<div class="badge d-inline bg-info text-white" style="font-size: large;">Energy ${balance.energy}/${balance.max_energy}</div><br>`;
+    sInnerHTML += "<br>Tools<br>";
+
+    // document.getElementById('resFarmersworld').innerHTML = `<img src="/js/FWW.png"></img> ${parseFloat(FWW.last_price).toFixed(4)} WAX, 
+		// <img src="/js/FWF.png"></img> ${parseFloat(FWF.last_price).toFixed(4)} WAX <img src="/js/FWG.png"></img> ${parseFloat(FWG.last_price).toFixed(4)} WAX<br>`;
+    // document.getElementById('resFarmersworld').innerHTML += `<div class="badge d-inline bg-info text-white" style="font-size: large;">Energy ${balance.energy}/${balance.max_energy}</div><br>`;
+    // document.getElementById('resFarmersworld').innerHTML += "<br>Tools<br>";
+    sInnerHTML += await fwTools(balanceGold);
     
-    document.getElementById('resFarmersworld').innerHTML += "<br>Member<br>";
-    await fwMembers();
+    sInnerHTML += "<br>Member<br>";
+    // document.getElementById('resFarmersworld').innerHTML += "<br>Member<br>";
+    sInnerHTML += await fwMembers();
     
-    document.getElementById('resFarmersworld').innerHTML += "<br>FarmPlot<br>";
-    await fwCrops();
-    
+    sInnerHTML += "<br>FarmPlot<br>";
+    // document.getElementById('resFarmersworld').innerHTML += "<br>FarmPlot<br>";
+    sInnerHTML += await fwCrops();
+    document.getElementById('resFarmersworld').innerHTML = sInnerHTML;
+
     if (balance.energy < fwRecover)
     {
       let recover = balanceFood * 5;
@@ -180,29 +220,76 @@
         else{console.log(`${recover} energy, RECOVER FAILED! ${ret}`);}
     }
   }
+
+  async function getTokensPrices() {
+    await getUsage();
+    let price = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD");
+    price = await price.json();
+    document.getElementById("waxusd").innerHTML = "&nbsp;₩: " + parseFloat(price.wax.usd).toFixed(4) +"&nbsp;";
+
+    let SEST = await fetch("https://wax.alcor.exchange/api/markets/156");
+    SEST = await SEST.json();
+    await new Promise(r => setTimeout(r, 1000));
+    let CBIT = await fetch("https://wax.alcor.exchange/api/markets/268");
+    CBIT = await CBIT.json();
+
+    document.getElementById('ftBalance').innerHTML = 
+    `<div class="d-inline-block w-100">&nbsp;
+      <div class="badge rounded-pill bg-light text-dark">
+        <img src="/js/SEST.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>&nbsp;${parseFloat(SEST.last_price).toFixed(4)} WAX</div>&nbsp;
+      <div class="badge rounded-pill bg-light text-dark">
+        <img src="/js/CBIT.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>&nbsp;${parseFloat(CBIT.last_price).toFixed(4)} WAX</div>
+    </div>`;
+
+    let BAM = await fetch("https://wax.alcor.exchange/api/markets/155").then(res => res.json());
+    document.getElementById('pandaBalance').innerHTML = 
+    `<div class="d-inline-block w-100">&nbsp;
+      <div class="badge rounded-pill bg-light text-dark">
+        <img src="/js/BAM.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>
+        &nbsp;${parseFloat(BAM.last_price).toFixed(4)} WAX</div>
+    </div>`;
+
+    let Ocoin = await fetch("https://wax.alcor.exchange/api/markets/258").then(res => res.json());
+    document.getElementById('officelandBalance').innerHTML = 
+    `<div class="d-inline-block w-100">&nbsp;
+      <div class="badge rounded-pill bg-light text-dark">
+        <img src="/js/OCOIN.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>
+        &nbsp;${parseFloat(Ocoin.last_price).toFixed(4)} WAX</div>
+    </div>`;
+
+    let FWW = await fetch("https://wax.alcor.exchange/api/markets/104");
+    await new Promise(r => setTimeout(r, 1000));
+    FWW = await FWW.json();
+    let FWF = await fetch("https://wax.alcor.exchange/api/markets/105");
+    await new Promise(r => setTimeout(r, 1000));
+    FWF = await FWF.json();
+    let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
+    await new Promise(r => setTimeout(r, 1000));
+    FWG = await FWG.json();
+
+    document.getElementById('fwBalance').innerHTML = 
+    `<div class="d-inline-block w-100">&nbsp;<div class="badge rounded-pill bg-light text-dark"><img src="/js/FWWtoken.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>&nbsp;${parseFloat(FWW.last_price).toFixed(4)} WAX</div>
+    &nbsp;<div class="badge rounded-pill bg-light text-dark"><img src="/js/FWFtoken.png" style='height: 15px;align-items: center;vertical-align: middle;'></img>&nbsp;${parseFloat(FWF.last_price).toFixed(4)} WAX</div>
+    &nbsp;<div class="badge rounded-pill bg-light text-dark"><img src="/js/FWGtoken.png" style='height: 15px;align-items: center;vertical-align: middle;'></img>&nbsp;${parseFloat(FWG.last_price).toFixed(4)} WAX</div></div>`;
+    
+  }
   
 	async function fwMembers(){
+    let sInnerHTML = "";
 		const mbs = await getTableRows_byIndex("farmersworld", "mbs", wax.userAccount, '2', 'name');
 		mbs.forEach(async element => {
 			const mbName = mbconf.rows.find(elem => elem.template_id === element.template_id);
-			let color;
-			if (mbName.type === "Food")
-			{
-				color = "bg-primary";
-			}
-			else if (mbName.type === "Wood")
-			{
-				color = "bg-success";
-			}
-			else
-			{
-				color = "bg-warning";
-			}
-			document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
-						<div class="badge bg-light" style="width: 130px;">${mbName.name}</div>&emsp;
-						<div class="badge ${color} text-white" style="width: 120px;">${mbName.type}</div>&emsp;
+			
+      sInnerHTML += `<div class="d-inline-flex w-100">
+						<div class="badge text-white" style="width: 130px; background-color: ${fwToolsColor[mbName.type]};">${mbName.name}</div>&emsp;
+						<div class="badge" style="width: 120px;">&emsp;</div>&emsp;
 						<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
 					</div><br>`;
+			// document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
+			// 			<div class="badge text-white" style="width: 130px; background-color: ${fwToolsColor[mbName.type]};">${mbName.name}</div>&emsp;
+			// 			<div class="badge" style="width: 120px;">&emsp;</div>&emsp;
+			// 			<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
+			// 		</div><br>`;
       if (element.next_availability - Date.now()/1000 < 0){
         let config = {
               actions: [{
@@ -232,18 +319,25 @@
         else{ console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`); }
       }
     });
+    return sInnerHTML;
   }
   
 	async function fwCrops(){
+    let sInnerHTML = "";
 		const crops = await getTableRows_byIndex("farmersworld", "crops", wax.userAccount, '2', 'name');
 		crops.forEach(async element => {
 		  	const cropName = cropconf.rows.find(elem => elem.template_id === element.template_id);
 			//document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, claimed ${element.times_claimed}/42, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
-			document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
+			sInnerHTML += `<div class="d-inline-flex w-100">
 					<div class="badge bg-warning text-dark" style="width: 130px;">${cropName.name}</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${element.times_claimed}/42</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
 				</div><br>`;
+      // document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
+			// 		<div class="badge bg-warning text-dark" style="width: 130px;">${cropName.name}</div>&emsp;
+			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${element.times_claimed}/42</div>&emsp;
+			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
+			// 	</div><br>`;
 			if (element.next_availability - Date.now()/1000 < 0){
 				let config = {
 					  actions: [{
@@ -268,30 +362,28 @@
 				}
       		}
   	});
+    return sInnerHTML;
   }
   
 	async function fwTools(balanceGold){
+    let sInnerHTML = "";
 		const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
-		tools.forEach(async element => {
-			const toolName = toolconf.rows.find(elem => elem.template_id === element.template_id);
-			let color;
-			if (toolName.type === "Food")
-			{
-				color = "bg-primary";
-			}
-			else if (toolName.type === "Wood")
-			{
-				color = "bg-success";
-			}
-			else
-			{
-				color = "bg-warning";
-			}
-			document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
-					<div class="badge ${color} text-white" style="width: 130px;">${toolName.template_name}</div>&emsp;
+		tools.sort(function(a, b) {
+      return a.template_id - b.template_id;
+    });
+    tools.forEach(async element => {
+      const toolName = toolconf.rows.find(elem => elem.template_id === element.template_id);
+			
+      sInnerHTML += `<div class="d-inline-flex w-100">
+					<div class="badge text-white" style="width: 130px; background-color: ${fwToolsColor[toolName.type]};">${toolName.template_name}</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${element.current_durability}/${element.durability}</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
 				</div><br>`;
+			// document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
+			// 		<div class="badge text-white" style="width: 130px; background-color: ${fwToolsColor[toolName.type]};">${toolName.template_name}</div>&emsp;
+			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${element.current_durability}/${element.durability}</div>&emsp;
+			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
+			// 	</div><br>`;
 			
       if (element.next_availability - Date.now()/1000 < 0){
         let config = {
@@ -359,6 +451,7 @@
         else{console.log(`Id ${ element.asset_id}, REPAIR FAILED! ${ret}`);}
       }
     });
+    return sInnerHTML;
   }
   
   async function fwDepositFWG(){
@@ -422,23 +515,37 @@
         console.log(`DEPOSIT FAILED`);
     }
   }
-//////////////////////////////////FARMERSWORLD///////////////////////
+//////////////////////////////////GOTOFARMINGTAILES///////////////////////
   async function Farmingtales() {
     if (!document.getElementById("ftCheck").checked){
       return;
     }
+    let sInnerHTML = "";
+    // let SEST = await fetch("https://wax.alcor.exchange/api/markets/156");
+    // SEST = await SEST.json();
 
-    let SEST = await fetch("https://wax.alcor.exchange/api/markets/156");
-    SEST = await SEST.json();
-
-    document.getElementById('resFarmingtales').innerHTML = `SEST: ${SEST.last_price}<br>`;
+    // document.getElementById('resFarmingtales').innerHTML = `SEST: ${parseFloat(SEST.last_price).toFixed(4)} WAX<br>`;
     const result_animal = await getTableRows_byIndex("farminggames", "animal", wax.userAccount, '2', 'name');
     // console.log(result);
     const resource = await getTableRows("farminggames", "resources", wax.userAccount);
     const food = resource.food;
     const water = resource.water;
     const currency = await getTableRows("farminggames", "wallet", wax.userAccount);
-    document.getElementById('ftBalance').innerHTML = `FOOD: ${food}, WATER: ${water}, ${parseFloat(currency.balances[0].value/10000).toFixed(2)} ${currency.balances[0].key}, ${parseFloat(currency.balances[1].value/10000).toFixed(2)} ${currency.balances[1].key}`;
+    
+    sInnerHTML += `
+    <div class="d-inline-flex w-100">
+      <div class="badge bg-success text-white" style="width: 150px;">FOOD: ${food}</div>&emsp;
+      <div class="badge bg-primary text-white" style="width: 120px;">WATER: ${water}</div>&emsp;
+      <div class="badge bg-warning text-dark" style="width: 120px;">${currency.balances[0].key}: ${parseFloat(currency.balances[0].value/10000).toFixed(2)}</div>&emsp;
+      <div class="badge bg-warning text-dark" style="width: 150px;">${currency.balances[1].key}: ${parseFloat(currency.balances[1].value/10000).toFixed(2)}</div>&nbsp;
+    </div><br><br>Farm<br>`;
+    // document.getElementById('ftBalance').innerHTML = `&nbsp;
+    // <div class="d-inline-block w-100">
+    //   <div class="badge rounded-pill bg-success text-white">FOOD: ${food}</div>&nbsp;
+    //   <div class="badge rounded-pill bg-primary text-white">WATER: ${water}</div>&nbsp;
+    //   <div class="badge rounded-pill bg-primary text-white">${currency.balances[0].key}: ${parseFloat(currency.balances[0].value/10000).toFixed(2)}</div>&nbsp;
+    //   <div class="badge rounded-pill bg-primary text-white">${currency.balances[1].key}: ${parseFloat(currency.balances[1].value/10000).toFixed(2)}</div>&nbsp;
+    // </div>`;
     let refill = true;
     let asset_id;
     result_animal.forEach( async element => {
@@ -446,8 +553,10 @@
       asset_id = element.asset_id;
       let last_harvest = Date.now()/1000 - element.last_harvest;
       // console.log(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
-      document.getElementById('resFarmingtales').append(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
-      document.getElementById('resFarmingtales').innerHTML += "<br>";
+      sInnerHTML += `<div class="d-inline-flex w-100">
+					<div class="badge bg-warning text-dark" style="width: 150px;">${coolDown.label}</div>&emsp;
+					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(coolDown.cooldown - last_harvest)}</div>
+				</div><br>`;
       if (coolDown.cooldown - last_harvest < 0){
         let config = {
               actions: [{
@@ -505,8 +614,10 @@
         asset_id = element.id;
         let last_harvest = Date.now()/1000 - element.last_harvest;
         // console.log(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
-        document.getElementById('resFarmingtales').append(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
-        document.getElementById('resFarmingtales').innerHTML += "<br>";
+        sInnerHTML += `<div class="d-inline-flex w-100">
+					<div class="badge bg-success text-white" style="width: 150px;">${coolDown.label}</div>&emsp;
+					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(coolDown.cooldown - last_harvest)}</div>
+				</div><br>`;
         if (coolDown.cooldown - last_harvest < 0){
           let config = {
                 actions: [{
@@ -556,11 +667,12 @@
           else {console.log("water_refill FAILED!");}
         }      
       });
+      document.getElementById('resFarmingtales').innerHTML = sInnerHTML;
   }
 
   async function sign(configTranscat) {
     if(!wax.api) {
-      return document.getElementById('response').append('* Login first *');
+      return document.getElementById('response').innerHTML = '* Login first *';
     }
 
     const updater = document.getElementById('updater').value;
@@ -605,7 +717,7 @@
         reverse: false,           // Optional: Get reversed data
     });
     } catch(e) {
-      document.getElementById('response').append(e.message);
+      document.getElementById('response').innerHTML = e.message;
       console.log("ERROR FOR: " + code + ", " + tableName + ", " + bound);
     }
     return result.rows;
@@ -658,53 +770,21 @@
 		return result;
 	  }
   
-  async function pandaBuyFood(){
-  	const foodRarity = dropdownlistPandaFoodList.options[dropdownlistPandaFoodList.selectedIndex].text;
-  	const foodAmount = dropdownlistPandaFoodUnit.options[dropdownlistPandaFoodUnit.selectedIndex].text;
-  	const foodPrice = pandaFoodPrice[dropdownlistPandaFoodList.selectedIndex];
-  	
-  	const _quantity = `${parseFloat(foodAmount*foodPrice).toFixed(4)} BAM`;
-  	const _memo = `buyeat ${foodRarity} ${foodAmount} `;
-  	
-  	let config = {
-              actions: [{
-                account: 'nftpandabamb',
-                name: 'transfer',
-                authorization: [{
-                  actor: wax.userAccount,
-                  permission: 'active',
-                }],
-                data: {
-                  from: wax.userAccount,
-                  to: "nftpandawofg",
-                  quantity: _quantity,
-                  memo: _memo
-                },
-              }]
-            };
-    let ret = await sign(config);
-    if (ret == true){
-        console.log(`BUY PANDA FOOD DONE!`);
-    }
-    else { 
-        console.log(`BUY PANDA FOOD FAILED`);
-    }
-  }
-
+//////////////////////////////////GOTONFTPANDA///////////////////////
   async function getPanda(){
     
     if (!document.getElementById("pandaCheck").checked){
       return;
     }
 
-    let BAM = await fetch("https://wax.alcor.exchange/api/markets/155");
-    BAM = await BAM.json();
-
+    let sInnerHTML = "";
     let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner="+wax.userAccount+"&page=1&limit=1000&order=desc&sort=asset_id");
     let FoodID = await jsonFood.json();
-    document.getElementById('pandaBalance').innerHTML =  "Food remain : " + Object.keys(FoodID.data).length + "ea";
-
-    document.getElementById('resnftPanda').innerHTML = `BAM: ${BAM.last_price}<br>`;
+    // document.getElementById('pandaBalance').innerHTML =  "Food remain : " + Object.keys(FoodID.data).length + "ea";
+    sInnerHTML += `<div class="d-inline-flex w-100">
+      <div class="badge bg-success text-white" style="width: 150px;">FOOD: ${Object.keys(FoodID.data).length}</div></div>`;
+      
+    // document.getElementById('resnftPanda').innerHTML = `BAM: ${BAM.last_price}<br>`;
 
     let res = await getTableRows("nftpandawofg", "usersnew", wax.userAccount);
     if (!res){
@@ -714,10 +794,28 @@
     
     for (let i=0; i<res.max_slots; i++){
       let ret = await getTableRows("nftpandawofg", 'nftsongamec', res.slots_count[i].toString());
+      const namePanda = ret.name_pa.split("-")[1];
       // console.log(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}`);
-      document.getElementById('resnftPanda').append(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}` +
-        ` energy: ${ret.energy}`);
-      document.getElementById('resnftPanda').innerHTML += "<br>";
+      sInnerHTML += `<div class="d-inline-flex w-100">
+					<div class="badge text-white" style="width: 120px; background-color: ${nftPandaColor[ret.element]};">${namePanda}</div>&emsp;`
+      if(ret.weapon != "0")
+      {
+        let getWeapon = await getTableRows("nftpandawofg", 'nftweapons', ret.weapon);
+        sInnerHTML += `<div class="badge text-white" style="width: 130px; background-color: ${nftPandaColor[getWeapon.element]};">
+          <img src="/js/PngItem_2767388.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>&nbsp;${nftPandaWeapon[getWeapon.rarity]}
+        </div>&emsp;`
+      }
+      else
+      {
+        sInnerHTML += `<div class="badge bg-secondary text-white" style="width: 130px;">None</div>&emsp;`
+      }
+
+      sInnerHTML += `<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(ret.timer - Date.now()/1000)}</div>&emsp;
+      <div class="badge bg-secondary text-white" style="width: 120px;">${ret.energy}/10000</div>
+				</div><br>`;
+      // document.getElementById('resnftPanda').append(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}` +
+      //   ` energy: ${ret.energy}`);
+      // document.getElementById('resnftPanda').innerHTML += "<br>";
       if (ret.timer - Date.now()/1000 < 0){
         let config = {
               actions: [{
@@ -775,36 +873,68 @@
         else {console.log(`Id ${res.slots_count[i]}, FEED FAILED! ${ret}`);}
       }
     }
+    document.getElementById('resnftPanda').innerHTML = sInnerHTML;
   }
   
+  async function pandaBuyFood(){
+  	const foodRarity = dropdownlistPandaFoodList.options[dropdownlistPandaFoodList.selectedIndex].text;
+  	const foodAmount = dropdownlistPandaFoodUnit.options[dropdownlistPandaFoodUnit.selectedIndex].text;
+  	const foodPrice = pandaFoodPrice[dropdownlistPandaFoodList.selectedIndex];
+  	
+  	const _quantity = `${parseFloat(foodAmount*foodPrice).toFixed(4)} BAM`;
+  	const _memo = `buyeat ${foodRarity} ${foodAmount} `;
+  	
+  	let config = {
+              actions: [{
+                account: 'nftpandabamb',
+                name: 'transfer',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  from: wax.userAccount,
+                  to: "nftpandawofg",
+                  quantity: _quantity,
+                  memo: _memo
+                },
+              }]
+            };
+    let ret = await sign(config);
+    if (ret == true){
+        console.log(`BUY PANDA FOOD DONE!`);
+    }
+    else { 
+        console.log(`BUY PANDA FOOD FAILED`);
+    }
+  }
+//////////////////////////////////GOTOOFFICELAND///////////////////////
   async function Officeland_task(){
-    
+    let sInnerHTML = "";
     if (!document.getElementById("officelandCheck").checked){
       return;
     }
-
-    let Ocoin = await fetch("https://wax.alcor.exchange/api/markets/258");
-    Ocoin = await Ocoin.json();
     
-	let officelandBalance = await getTableRows("officegameio", "balances", wax.userAccount);
-	document.getElementById('officelandBalance').innerHTML = officelandBalance.quantity;
-    document.getElementById('resofficeland').innerHTML = `Ocoin: ${Ocoin.last_price}<br>`;
-
+    let officelandBalance = await getTableRows("officegameio", "balances", wax.userAccount);
+    // document.getElementById('officelandBalance').innerHTML = officelandBalance.quantity;
+    // document.getElementById('resofficeland').innerHTML = `Ocoin: ${Ocoin.last_price}<br>`;
+    sInnerHTML += `<div class="d-inline-flex w-100">
+      <div class="badge bg-warning text-white" style="width: 180px;">${officelandBalance.quantity}</div></div>`;
+    
     let res = await getTableRows("officegameio", "publicspace", wax.userAccount);
     if (!res){
       console.log("GET STAFF ERROR");
       return;
     }    
-    
-    for (let i=0; i<res.asset_ids.filter(x => x!=0).length; i++){
-      let ret = []
-      ret = await getTableRows_byIndex("officegameio", 'taskassign', res.asset_ids[i].toString(), "2", "i64");
+    res = res.asset_ids.filter(x => x!=0);
+
+    for (let i=0; i<res.length; i++){
+      let ret = [];
+      ret = await getTableRows_byIndex("officegameio", 'taskassign', res[i].toString(), "2", "i64");
+      let template_id = await fetch("https://wax.api.atomicassets.io/atomicmarket/v1/assets/" + res[i].toString()).then(response => response.json());
       if (ret.length == 0){
-      	let template_id = await fetch("https://wax.api.atomicassets.io/atomicmarket/v1/assets/" + res.asset_ids[i].toString());
-      	template_id = await template_id.json();
-      	template_id = template_id.data.template.template_id;
-      	let jobNum = await getTableRows_byIndex("officegameio", 'rarity', template_id, "2", "i64");
-      	jobNum = officelandJoblist[jobNum[0].rarity_name];
+      	// let jobNum = await getTableRows_byIndex("officegameio", 'rarity', template_id, "2", "i64");
+      	let jobNum = officelandJoblist[template_id.data.data.rarity];
         let config = {
               actions: [{
                 account: 'officegameio',
@@ -816,20 +946,23 @@
                 data: {
                   player: wax.userAccount,
                   task_id: jobNum,
-                  asset_id: res.asset_ids[i].toString()
+                  asset_id: res[i].toString()
                 },
               }]
             };
         let ret_sign = await sign(config);
         if (ret_sign == true){
-          console.log(`Id ${res.asset_ids[i].toString()}, GO WORK SUCCESS!`);
+          console.log(`Id ${res[i].toString()}, GO WORK SUCCESS!`);
         }
-        else { console.log(`Id ${res.asset_ids[i].toString()}, GO WORK FAILED! ${ret}`); }
+        else { console.log(`Id ${res[i].toString()}, GO WORK FAILED! ${ret}`); }
         continue;
       }
-      
-      document.getElementById('resofficeland').append(`asset_id ${res.asset_ids[i]}, next_harvest ${sec2time(ret[0].task_end - Date.now()/1000)}`);
-      document.getElementById('resofficeland').innerHTML += "<br>";
+      // document.getElementById('resofficeland').append(`asset_id ${res[i]}, next_harvest ${sec2time(ret[0].task_end - Date.now()/1000)}`);
+      // document.getElementById('resofficeland').innerHTML += "<br>";
+      sInnerHTML += `<div class="d-inline-flex w-100">
+					<div class="badge text-white" style="width: 120px; background-color: ${officelandColor[template_id.data.data.rarity]};">${template_id.data.data.name}</div>&emsp;
+          <div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(ret[0].task_end - Date.now()/1000)}</div>
+				</div><br>`;
       if (ret[0].task_end - Date.now()/1000 < 0){
       	let config = {
               actions: [{
@@ -847,7 +980,7 @@
             };
         let ret_sign = await sign(config);
         if (ret_sign == true){
-          console.log(`Id ${res.asset_ids[i].toString()}, FINISHED TASK!`);
+          console.log(`Id ${res[i].toString()}, FINISHED TASK!`);
         }
       }
     }
@@ -870,6 +1003,7 @@
             };
         let ret_sign = await sign(config);
     }
+    document.getElementById('resofficeland').innerHTML = sInnerHTML;
   }
 
   async function getCurrentMessage() {
@@ -897,7 +1031,7 @@
     {
       id: 'FarmingTales',       // unique ID of the task
       // tickDelay: 1,       // 1 tick delay before first run
-      tickInterval: 55,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 53,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
@@ -908,7 +1042,7 @@
     {
       id: 'FarmersWorld',       // unique ID of the task
       // tickDelay: 1,       // 1 tick delay before first run
-      tickInterval: 15,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 17,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
@@ -919,7 +1053,7 @@
     {
       id: 'nftPanda',       // unique ID of the task
       // tickDelay: 1,       // 1 tick delay before first run
-      tickInterval: 60,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 61,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
@@ -930,12 +1064,23 @@
     {
       id: 'officeland',       // unique ID of the task
       // tickDelay: 1,       // 1 tick delay before first run
-      tickInterval: 70,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 71,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
           console.log(`${task.id} task has run ${task.currentRuns} times.`);
           Officeland_task();
+      }
+    },
+    {
+      id: 'tokenPrice',       // unique ID of the task
+      // tickDelay: 0,       // 1 tick delay before first run
+      tickInterval: 113,   // run every 10 ticks (10 x interval = 10000 ms)
+      totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
+      callback(task) {
+          // timerlogin.reset();
+          console.log(`${task.id} task has run ${task.currentRuns} times.`);
+          getTokensPrices();
       }
     }
     
