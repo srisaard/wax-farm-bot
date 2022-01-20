@@ -1,6 +1,7 @@
 # wax-farm-bot
 CODE BASE: https://github.com/worldwide-asset-exchange/waxjs
-
+> donate :beer:: 13.gm
+> 
 For farmersworld/farmingtales/nftpanda/officeland
 
 1. Download zip and Extract/Unzip to wherever you want
@@ -25,5 +26,8 @@ For farmersworld/farmingtales/nftpanda/officeland
 - line notification <br>
 > https://notify-bot.line.me/en/
 <img src="https://user-images.githubusercontent.com/49296797/141815250-6f1aba09-97f6-4024-90f0-bfa75d1a57ad.png" width=40%>
-
-> donate :beer:: 13.gm
+<br><hr>
+CHANGELOG
+=> 220120
+    - Show CPU usage
+    - Update UI
