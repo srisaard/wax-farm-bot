@@ -39,15 +39,34 @@
     <h3 id="current" style="display:none;"></h3><br>
     <hr>
     <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"></input>    <label id="fwBalance"></label>
-    <br>DEPOSIT GOLD <input id="fwDepositFWG" placeholder="432.1234"> <button type="button" class="regular" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button>
-    <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="regular" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br>
+    <!-- <br>DEPOSIT GOLD <input id="xx" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button> -->
+    <!-- <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br> -->
+    <div class="input-group mb-0" style="display: flex; align-items: center;">
+      <div class="col-2"><span class="align-middle">DEPOSIT GOLD</span></div>
+      <div class="col-3">
+        <input id="fwDepositFWG" type="text" class="form-control" placeholder="321.1234" aria-label="321.1234" aria-describedby="basic-addon2">
+      </div>
+      <div class="col-3">  
+        <button class="btn btn-warning" type="button" onclick=fwDepositFWG() id="fwDepositFWGButton">DEPOSIT</button>
+      </div>
+    </div>
+    <div class="input-group mb-0" style="display: flex; align-items: center;">
+      <div class="col-2"><span class="align-middle">DEPOSIT FOOD</span></div>
+      <div class="col-3">
+        <input id="fwDepositFWF" type="text" class="form-control" placeholder="321.1234" aria-label="321.1234" aria-describedby="basic-addon2">
+      </div>
+      <div class="col-3">  
+        <button class="btn btn-primary" type="button" onclick=fwDepositFWF() id="fwDepositFWFButton">DEPOSIT</button>
+      </div>
+    </div>
+    <br>
     <h5 id="resFarmersworld"></h5>
     <hr>
     <label>FarmingTales</label>    <input type="checkbox" id="ftCheck" checked="true"></input>    <label id="ftBalance"></label>
     <h5 id="resFarmingtales"></h5>
     <hr>
     <label>nftPanda</label>    <input type="checkbox" id="pandaCheck" checked="true"></input>    <label id="pandaBalance"></label>
-    <br><select id = "pandaFoodUnit"></select> <select id = "pandaFoodList"></select>  <button type="button" class="regular" onclick=pandaBuyFood() id="pandaBuyFoodButton">Buy</button>
+    <br><select id = "pandaFoodUnit"></select> <select id = "pandaFoodList"></select>  <button type="button" class="btn btn-outline-primary btn-sm" onclick=pandaBuyFood() id="pandaBuyFoodButton">Buy</button>
     <h5 id="resnftPanda"></h5>
     <hr>
     <label>Officeland</label>    <input type="checkbox" id="officelandCheck" checked="true"></input>    <label id="officelandBalance"></label>
@@ -61,7 +80,7 @@
 	// Common param
 	const { TaskTimer } = tasktimer;
 	const wax = new waxjs.WaxJS({
-		rpcEndpoint: 'https://api.waxsweden.org', // // 'https://wax.pink.gg', 
+		rpcEndpoint: 'https://api.wax.alohaeos.com/', //'https://api.waxsweden.org', // // , 'https://wax.pink.gg'
 		tryAutoLogin: true,
 		waxSigningURL: "https://all-access.wax.io",
 		waxAutoSigningURL: "https://api-idm.wax.io/v1/accounts/auto-accept/"
@@ -121,7 +140,13 @@
 	}
 
   async function getUsage(){
-    const get_account = await fetch("https://api.waxsweden.org/v2/state/get_account?account="+wax.userAccount).then(response => response.json());
+    let get_account;
+    try{
+      get_account = await fetch("https://api.waxsweden.org/v2/state/get_account?account="+wax.userAccount).then(response => response.json());
+    }
+    catch{
+      get_account = await fetch("https://api.wax.alohaeos.com/v2/state/get_account?account="+wax.userAccount).then(response => response.json());
+    }
     const cpuUsage = Math.floor(100*get_account.account.cpu_limit.used/get_account.account.cpu_limit.max);
     const waxInWallet = get_account.account.core_liquid_balance.split(" ")[0];
     let sInnerHTML = `<div class="progress" style="height: 25px; width: 75%; background-color: Silver;">
@@ -131,6 +156,13 @@
           background-color: rgb(0, 0, 205); font-size: medium;"><b>CPU: ${cpuUsage}%</b></div>
       </div>`;
     document.getElementById("usage").innerHTML = sInnerHTML;
+
+    get_account.tokens.forEach(token => {
+      if(token.symbol == "FWG")
+        document.getElementById("fwDepositFWG").placeholder = "Your have " + token.amount.toString() + " FWG";
+      else if(token.symbol == "FWF")
+        document.getElementById("fwDepositFWF").placeholder = "Your have " + token.amount.toString() + " FWF";
+    });
   }
 
 //////////////////////////////////GOTOFARMERSWORLD///////////////////////
@@ -325,7 +357,40 @@
 	async function fwCrops(){
     let sInnerHTML = "";
 		const crops = await getTableRows_byIndex("farmersworld", "crops", wax.userAccount, '2', 'name');
-		crops.forEach(async element => {
+		if(crops.length < 8)
+    {
+      const building = await getTableRows_byIndex("farmersworld", "buildings", wax.userAccount, '2', 'name');
+      building.forEach(async element => {
+        if(element.name == "Farm Plot" && element.slots_used < 8)
+        {
+          let seed = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?page=1&limit=1000&template_whitelist=298595&collection_name=farmersworld&owner=" + wax.userAccount).then(response => response.json());
+          if(seed.data.length == 0)
+          {
+            seed = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?page=1&limit=1000&template_whitelist=298596&collection_name=farmersworld&owner=" + wax.userAccount).then(response => response.json());
+          }
+          let config = {
+              actions: [{
+                account: 'atomicassets',
+                name: 'transfer',
+                authorization: [{
+                  actor: wax.userAccount,
+                  permission: 'active',
+                }],
+                data: {
+                  from: wax.userAccount,
+                  to: "farmersworld",
+                  asset_ids: [seed.data[0].asset_id],
+                  memo: "stack"
+                },
+              }]
+            };
+        let ret = await sign(config);
+        if (ret == true){console.log(`Id ${seed.data[0].asset_id}, STACK CROPS SUCCESS!`);}
+        else {console.log(`Id ${seed.data[0].asset_id}, STACK CROPS FAILED! ${ret}`);}
+        }
+      });
+    }
+    crops.forEach(async element => {
 		  	const cropName = cropconf.rows.find(elem => elem.template_id === element.template_id);
 			//document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, claimed ${element.times_claimed}/42, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
 			sInnerHTML += `<div class="d-inline-flex w-100">
