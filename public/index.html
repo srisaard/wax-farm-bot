@@ -1052,8 +1052,9 @@
       }
     }
     
-    res = await getTableRows_byIndex("officegameio", 'finishtask', wax.userAccount, "2", "name");
-    if ((Date.now()/1000 - res[0].finish_time)/86400 > 6){
+    res = await getTableRows("officegameio", 'waitclaims', wax.userAccount);
+    res = res.claim_datas[0]
+    if ((Date.now()/1000 - res.finish_time)/86400 > 6){
     	let config = {
               actions: [{
                 account: 'officegameio',
@@ -1064,7 +1065,7 @@
                 }],
                 data: {
                   player: wax.userAccount,
-                  finish_id: res[0].finish_id.toString()
+                  finish_id: res.finish_id.toString()
                 },
               }]
             };
