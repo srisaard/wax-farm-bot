@@ -16,7 +16,7 @@ app.use((req, res, next) => {
     next();  
  });
 
- app.post("/submit", (req, res)=>{
+app.post("/submit", (req, res)=>{
     const token = process.env.TOKEN
     const url_line_notification = "https://notify-api.line.me/api/notify";
     if (token == '') {
@@ -46,5 +46,17 @@ app.use((req, res, next) => {
     console.log(req.body);
     res.end("yes");
 });
+
+app.get('/want', (req, res) => {
+    request(
+      { url: req.query.url},
+      (error, response, body) => {
+        if (error || response.statusCode !== 200) {
+          return res.status(500).json({ type: 'error', message: err.message });
+        }
+        res.json(JSON.parse(body));
+      }
+    )
+  });
 
 app.listen(port, () => {console.log('server on' + port)});

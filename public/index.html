@@ -289,15 +289,24 @@
         &nbsp;${parseFloat(Ocoin.last_price).toFixed(4)} WAX</div>
     </div>`;
 
-    let FWW = await fetch("https://wax.alcor.exchange/api/markets/104");
-    await new Promise(r => setTimeout(r, 1000));
-    FWW = await FWW.json();
-    let FWF = await fetch("https://wax.alcor.exchange/api/markets/105");
-    await new Promise(r => setTimeout(r, 1000));
-    FWF = await FWF.json();
-    let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
-    await new Promise(r => setTimeout(r, 1000));
-    FWG = await FWG.json();
+    let FWW = await await $.ajax({
+                url: "/want?url=https://wax.alcor.exchange/api/markets/104/",
+                type: 'GET',
+                dataType: 'json', // added data type
+                
+            });
+    let FWF = await $.ajax({
+                url: "/want?url=https://wax.alcor.exchange/api/markets/105/",
+                type: 'GET',
+                dataType: 'json', // added data type
+                
+            });
+    let FWG = await await $.ajax({
+                url: "/want?url=https://wax.alcor.exchange/api/markets/106/",
+                type: 'GET',
+                dataType: 'json', // added data type
+                
+            });
 
     document.getElementById('fwBalance').innerHTML = 
     `<div class="d-inline-block w-100">&nbsp;<div class="badge rounded-pill bg-light text-dark"><img src="/js/FWWtoken.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>&nbsp;${parseFloat(FWW.last_price).toFixed(4)} WAX</div>
