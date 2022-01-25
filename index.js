@@ -47,21 +47,4 @@ app.post("/submit", (req, res)=>{
     res.end("yes");
 });
 
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    next();
-  });
-
-app.get('/want', (req, res) => {
-    request(
-      { url: req.query.url},
-      (error, response, body) => {
-        if (error || response.statusCode !== 200) {
-          return res.status(500).json({ type: 'error', message: err.message });
-        }
-        res.json(JSON.parse(body));
-      }
-    )
-  });
-
 app.listen(port, () => {console.log('server on' + port)});
