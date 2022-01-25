@@ -289,22 +289,18 @@
         &nbsp;${parseFloat(Ocoin.last_price).toFixed(4)} WAX</div>
     </div>`;
 
-    let FWW = await $.ajax({
-                url: "/want?url=https://wax.alcor.exchange/api/markets/104/",
-                type: 'GET',
-                dataType: 'json', // added data type
-            });
-    let FWF = await $.ajax({
-                url: "/want?url=https://wax.alcor.exchange/api/markets/105/",
-                type: 'GET',
-                dataType: 'json', // added data type
-            });
-    let FWG = await $.ajax({
-                url: "/want?url=https://wax.alcor.exchange/api/markets/106/",
-                type: 'GET',
-                dataType: 'json', // added data type
-            });
-
+    let FWW = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://wax.alcor.exchange/api/markets/104/')}`)
+                    .then(response => response.json());
+    FWW = JSON.parse(FWW.contents);
+	  
+    let FWF = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://wax.alcor.exchange/api/markets/105/')}`)
+                    .then(response => response.json());
+    FWF = JSON.parse(FWF.contents);
+	  
+    let FWG = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://wax.alcor.exchange/api/markets/106/')}`)
+                    .then(response => response.json());
+    FWG = JSON.parse(FWG.contents);
+	  
     document.getElementById('fwBalance').innerHTML = 
     `<div class="d-inline-block w-100">&nbsp;<div class="badge rounded-pill bg-light text-dark"><img src="/js/FWWtoken.png" style='height: 15px;vertical-align: middle;align-items: center;'></img>&nbsp;${parseFloat(FWW.last_price).toFixed(4)} WAX</div>
     &nbsp;<div class="badge rounded-pill bg-light text-dark"><img src="/js/FWFtoken.png" style='height: 15px;align-items: center;vertical-align: middle;'></img>&nbsp;${parseFloat(FWF.last_price).toFixed(4)} WAX</div>
@@ -1146,7 +1142,7 @@
     {
       id: 'tokenPrice',       // unique ID of the task
       // tickDelay: 0,       // 1 tick delay before first run
-      tickInterval: 13,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 113,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
