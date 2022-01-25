@@ -47,6 +47,11 @@ app.post("/submit", (req, res)=>{
     res.end("yes");
 });
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  });
+
 app.get('/want', (req, res) => {
     request(
       { url: req.query.url},

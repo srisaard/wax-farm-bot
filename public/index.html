@@ -254,7 +254,7 @@
   }
 
   async function getTokensPrices() {
-    await getUsage();
+    // await getUsage();
     let price = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD");
     price = await price.json();
     document.getElementById("waxusd").innerHTML = "&nbsp;₩: " + parseFloat(price.wax.usd).toFixed(4) +"&nbsp;";
@@ -293,19 +293,16 @@
                 url: "/want?url=https://wax.alcor.exchange/api/markets/104/",
                 type: 'GET',
                 dataType: 'json', // added data type
-                
             });
     let FWF = await $.ajax({
                 url: "/want?url=https://wax.alcor.exchange/api/markets/105/",
                 type: 'GET',
                 dataType: 'json', // added data type
-                
             });
     let FWG = await $.ajax({
                 url: "/want?url=https://wax.alcor.exchange/api/markets/106/",
                 type: 'GET',
                 dataType: 'json', // added data type
-                
             });
 
     document.getElementById('fwBalance').innerHTML = 
@@ -1149,7 +1146,7 @@
     {
       id: 'tokenPrice',       // unique ID of the task
       // tickDelay: 0,       // 1 tick delay before first run
-      tickInterval: 113,   // run every 10 ticks (10 x interval = 10000 ms)
+      tickInterval: 13,   // run every 10 ticks (10 x interval = 10000 ms)
       totalRuns: 0,       // run 2 times only. (set to 0 for unlimited times)
       callback(task) {
           // timerlogin.reset();
