@@ -12,7 +12,9 @@ For farmersworld/farmingtales/nftpanda/officeland
 4. run
 <img src="https://user-images.githubusercontent.com/49296797/149676211-a0e27305-7fbc-498e-8f77-795f7ad2280e.png" width=70%>
 
-> node .
+```
+node .
+```
 5. open browser and go to
 > http://localhost:6969/
 
@@ -31,3 +33,7 @@ For farmersworld/farmingtales/nftpanda/officeland
 <h3>=>&nbsp;220120</h3>
 <h5>&emsp;- Show CPU usage</h5>
 <h5>&emsp;- Update UI</h5>
+<br><hr>
+<h1>SIDE PROJECT FOR SIMULATE PORT</h1>
+https://farmersworld-simulator.vercel.app/
+<img src="https://user-images.githubusercontent.com/49296797/151424770-f9ee8dd7-96a8-49cc-b1db-22f84f1143bd.png" width=40%>
