@@ -171,13 +171,6 @@
       return;
     }
     
-    // let FWW = await fetch("https://wax.alcor.exchange/api/markets/104");
-    // FWW = await FWW.json();
-    // let FWF = await fetch("https://wax.alcor.exchange/api/markets/105");
-    // FWF = await FWF.json();
-    // let FWG = await fetch("https://wax.alcor.exchange/api/markets/106");
-    // FWG = await FWG.json();
-
     const balance = await getTableRows("farmersworld", "accounts", wax.userAccount);
     const fee = await getTableRows("farmersworld", "config", "");
     
@@ -194,26 +187,18 @@
     	}
     );
 
-    // document.getElementById('fwBalance').innerHTML = `${balance.balances},<div class="badge d-inline bg-primary text-white">fee: ${fee.fee}%</div>`;
-    
     let sInnerHTML = "";
     sInnerHTML += `<img src="/js/FWW.png"></img> ${parseFloat(balanceWood).toFixed(2)},&nbsp; 
 		<img src="/js/FWF.png"></img> ${parseFloat(balanceFood).toFixed(2)},&nbsp;<img src="/js/FWG.png"></img> ${parseFloat(balanceGold).toFixed(2)}<br>`;
     sInnerHTML += `<div class="badge d-inline bg-info text-white" style="font-size: large;">Energy ${balance.energy}/${balance.max_energy}</div><br>`;
     sInnerHTML += "<br>Tools<br>";
 
-    // document.getElementById('resFarmersworld').innerHTML = `<img src="/js/FWW.png"></img> ${parseFloat(FWW.last_price).toFixed(4)} WAX, 
-		// <img src="/js/FWF.png"></img> ${parseFloat(FWF.last_price).toFixed(4)} WAX <img src="/js/FWG.png"></img> ${parseFloat(FWG.last_price).toFixed(4)} WAX<br>`;
-    // document.getElementById('resFarmersworld').innerHTML += `<div class="badge d-inline bg-info text-white" style="font-size: large;">Energy ${balance.energy}/${balance.max_energy}</div><br>`;
-    // document.getElementById('resFarmersworld').innerHTML += "<br>Tools<br>";
-    sInnerHTML += await fwTools(balanceGold);
+    sInnerHTML += await fwTools(balanceGold, balance);
     
     sInnerHTML += "<br>Member<br>";
-    // document.getElementById('resFarmersworld').innerHTML += "<br>Member<br>";
     sInnerHTML += await fwMembers();
     
     sInnerHTML += "<br>FarmPlot<br>";
-    // document.getElementById('resFarmersworld').innerHTML += "<br>FarmPlot<br>";
     sInnerHTML += await fwCrops();
     document.getElementById('resFarmersworld').innerHTML = sInnerHTML;
 
@@ -254,7 +239,7 @@
   }
 
   async function getTokensPrices() {
-    // await getUsage();
+    await getUsage();
     let price = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD");
     price = await price.json();
     document.getElementById("waxusd").innerHTML = "&nbsp;₩: " + parseFloat(price.wax.usd).toFixed(4) +"&nbsp;";
@@ -394,17 +379,12 @@
     }
     crops.forEach(async element => {
 		  	const cropName = cropconf.rows.find(elem => elem.template_id === element.template_id);
-			//document.getElementById('resFarmersworld').append(`Id ${element.asset_id}, claimed ${element.times_claimed}/42, next_harvest ${sec2time(element.next_availability - Date.now()/1000)}`);
 			sInnerHTML += `<div class="d-inline-flex w-100">
 					<div class="badge bg-warning text-dark" style="width: 130px;">${cropName.name}</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${element.times_claimed}/42</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
 				</div><br>`;
-      // document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
-			// 		<div class="badge bg-warning text-dark" style="width: 130px;">${cropName.name}</div>&emsp;
-			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${element.times_claimed}/42</div>&emsp;
-			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
-			// 	</div><br>`;
+        
 			if (element.next_availability - Date.now()/1000 < 0){
 				let config = {
 					  actions: [{
@@ -432,7 +412,7 @@
     return sInnerHTML;
   }
   
-	async function fwTools(balanceGold){
+	async function fwTools(balanceGold, balance){
     let sInnerHTML = "";
 		const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
 		tools.sort(function(a, b) {
@@ -446,11 +426,6 @@
 					<div class="badge bg-secondary text-white" style="width: 120px;">${element.current_durability}/${element.durability}</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
 				</div><br>`;
-			// document.getElementById('resFarmersworld').innerHTML += `<div class="d-inline-flex w-100">
-			// 		<div class="badge text-white" style="width: 130px; background-color: ${fwToolsColor[toolName.type]};">${toolName.template_name}</div>&emsp;
-			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${element.current_durability}/${element.durability}</div>&emsp;
-			// 		<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(element.next_availability - Date.now()/1000)}</div>
-			// 	</div><br>`;
 			
       if (element.next_availability - Date.now()/1000 < 0){
         let config = {
@@ -588,12 +563,9 @@
       return;
     }
     let sInnerHTML = "";
-    // let SEST = await fetch("https://wax.alcor.exchange/api/markets/156");
-    // SEST = await SEST.json();
 
-    // document.getElementById('resFarmingtales').innerHTML = `SEST: ${parseFloat(SEST.last_price).toFixed(4)} WAX<br>`;
     const result_animal = await getTableRows_byIndex("farminggames", "animal", wax.userAccount, '2', 'name');
-    // console.log(result);
+    
     const resource = await getTableRows("farminggames", "resources", wax.userAccount);
     const food = resource.food;
     const water = resource.water;
@@ -606,20 +578,13 @@
       <div class="badge bg-warning text-dark" style="width: 120px;">${currency.balances[0].key}: ${parseFloat(currency.balances[0].value/10000).toFixed(2)}</div>&emsp;
       <div class="badge bg-warning text-dark" style="width: 150px;">${currency.balances[1].key}: ${parseFloat(currency.balances[1].value/10000).toFixed(2)}</div>&nbsp;
     </div><br><br>Farm<br>`;
-    // document.getElementById('ftBalance').innerHTML = `&nbsp;
-    // <div class="d-inline-block w-100">
-    //   <div class="badge rounded-pill bg-success text-white">FOOD: ${food}</div>&nbsp;
-    //   <div class="badge rounded-pill bg-primary text-white">WATER: ${water}</div>&nbsp;
-    //   <div class="badge rounded-pill bg-primary text-white">${currency.balances[0].key}: ${parseFloat(currency.balances[0].value/10000).toFixed(2)}</div>&nbsp;
-    //   <div class="badge rounded-pill bg-primary text-white">${currency.balances[1].key}: ${parseFloat(currency.balances[1].value/10000).toFixed(2)}</div>&nbsp;
-    // </div>`;
+    
     let refill = true;
     let asset_id;
     result_animal.forEach( async element => {
       let coolDown = await getTableRows("farminggames", 'confanimal', element.template_id.toString());
       asset_id = element.asset_id;
       let last_harvest = Date.now()/1000 - element.last_harvest;
-      // console.log(`asset_id ${asset_id}, ${coolDown.label} next_harvest ${sec2time(coolDown.cooldown - last_harvest)}`);
       sInnerHTML += `<div class="d-inline-flex w-100">
 					<div class="badge bg-warning text-dark" style="width: 150px;">${coolDown.label}</div>&emsp;
 					<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(coolDown.cooldown - last_harvest)}</div>
@@ -752,7 +717,7 @@
         expireSeconds: 30
       });
       
-      document.getElementById('response').append(JSON.stringify(result));
+      document.getElementById('response').innerText = JSON.stringify(result);
       await new Promise(resolve => setTimeout(resolve, 1000));
       return true;
       // await getCurrentMessage();
@@ -847,12 +812,9 @@
     let sInnerHTML = "";
     let jsonFood = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?collection_name=nftpandawaxp&schema_name=food&owner="+wax.userAccount+"&page=1&limit=1000&order=desc&sort=asset_id");
     let FoodID = await jsonFood.json();
-    // document.getElementById('pandaBalance').innerHTML =  "Food remain : " + Object.keys(FoodID.data).length + "ea";
     sInnerHTML += `<div class="d-inline-flex w-100">
       <div class="badge bg-success text-white" style="width: 150px;">FOOD: ${Object.keys(FoodID.data).length}</div></div>`;
       
-    // document.getElementById('resnftPanda').innerHTML = `BAM: ${BAM.last_price}<br>`;
-
     let res = await getTableRows("nftpandawofg", "usersnew", wax.userAccount);
     if (!res){
       console.log("GET PANDA ERROR");
@@ -880,9 +842,6 @@
       sInnerHTML += `<div class="badge bg-secondary text-white" style="width: 120px;">${sec2time(ret.timer - Date.now()/1000)}</div>&emsp;
       <div class="badge bg-secondary text-white" style="width: 120px;">${ret.energy}/10000</div>
 				</div><br>`;
-      // document.getElementById('resnftPanda').append(`asset_id ${res.slots_count[i]}, next_harvest ${sec2time(ret.timer - Date.now()/1000)}` +
-      //   ` energy: ${ret.energy}`);
-      // document.getElementById('resnftPanda').innerHTML += "<br>";
       if (ret.timer - Date.now()/1000 < 0){
         let config = {
               actions: [{
@@ -1058,7 +1017,7 @@
     	let config = {
               actions: [{
                 account: 'officegameio',
-                name: 'claimreward',
+                name: 'claim',
                 authorization: [{
                   actor: wax.userAccount,
                   permission: 'active',
