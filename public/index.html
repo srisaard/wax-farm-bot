@@ -398,13 +398,13 @@
                   from: wax.userAccount,
                   to: "farmersworld",
                   asset_ids: [seed.data[0].asset_id],
-                  memo: "stack"
+                  memo: "stake"
                 },
               }]
             };
         let ret = await sign(config);
-        if (ret == true){console.log(`Id ${seed.data[0].asset_id}, STACK CROPS SUCCESS!`);}
-        else {console.log(`Id ${seed.data[0].asset_id}, STACK CROPS FAILED! ${ret}`);}
+        if (ret == true){console.log(`Id ${seed.data[0].asset_id}, STAKE CROPS SUCCESS!`);}
+        else {console.log(`Id ${seed.data[0].asset_id}, STAKE CROPS FAILED! ${ret}`);}
         }
       });
     }
