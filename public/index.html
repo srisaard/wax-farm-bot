@@ -38,7 +38,7 @@
     <!-- <label>Current Message</label> -->
     <h3 id="current" style="display:none;"></h3><br>
     <hr>
-    <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"></input>    <label id="fwBalance"></label>
+    <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"> </input>    <label id="fwBalance"></label>
     <!-- <br>DEPOSIT GOLD <input id="xx" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button> -->
     <!-- <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br> -->
     <div class="input-group mb-0" style="display: flex; align-items: center;">
@@ -142,10 +142,14 @@
   async function getUsage(){
     let get_account;
     try{
-      get_account = await fetch("https://api.waxsweden.org/v2/state/get_account?account="+wax.userAccount).then(response => response.json());
+      get_account = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('http://wax.eosphere.io/v2/state/get_account?account='+wax.userAccount)}`)
+                    .then(response => response.json());
+      get_account = JSON.parse(get_account.contents);
     }
     catch{
-      get_account = await fetch("https://api.wax.alohaeos.com/v2/state/get_account?account="+wax.userAccount).then(response => response.json());
+      get_account = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.wax.alohaeos.com/v2/state/get_account?account='+wax.userAccount)}`)
+                    .then(response => response.json());
+      get_account = JSON.parse(get_account.contents);
     }
     const cpuUsage = Math.floor(100*get_account.account.cpu_limit.used/get_account.account.cpu_limit.max);
     const waxInWallet = get_account.account.core_liquid_balance.split(" ")[0];
@@ -197,8 +201,7 @@
     
     sInnerHTML += "<br>Member<br>";
     sInnerHTML += await fwMembers();
-    
-    sInnerHTML += "<br>FarmPlot<br>";
+    sInnerHTML += `<br>FarmPlot<br>`;
     sInnerHTML += await fwCrops();
     document.getElementById('resFarmersworld').innerHTML = sInnerHTML;
 
@@ -348,12 +351,40 @@
     {
       const building = await getTableRows_byIndex("farmersworld", "buildings", wax.userAccount, '2', 'name');
       building.forEach(async element => {
+        if (element.next_availability - Date.now()/1000 < 0){
+          let config = {
+              actions: [{
+              account: 'farmersworld',
+              name: 'bldclaim',
+              authorization: [{
+                actor: wax.userAccount,
+                permission: 'active',
+              }],
+              data: {
+                owner: wax.userAccount,
+                asset_id: element.asset_id
+              },
+            }]
+          };
+          let ret = await sign(config);
+          if (ret == true){
+            console.log(`Id ${element.asset_id}, BUILD SUCCESS!`);
+          }
+          else{
+            console.log(`Id ${element.asset_id}, BUILD FAILED! ${ret}`);
+          }
+        }
+
         if(element.name == "Farm Plot" && element.slots_used < 8)
         {
           let seed = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?page=1&limit=1000&template_whitelist=298595&collection_name=farmersworld&owner=" + wax.userAccount).then(response => response.json());
           if(seed.data.length == 0)
           {
             seed = await fetch("https://wax.api.atomicassets.io/atomicassets/v1/assets?page=1&limit=1000&template_whitelist=298596&collection_name=farmersworld&owner=" + wax.userAccount).then(response => response.json());
+          }
+          if(seed.data.length == 0)
+          {
+            return;
           }
           let config = {
               actions: [{
@@ -377,6 +408,7 @@
         }
       });
     }
+
     crops.forEach(async element => {
 		  	const cropName = cropconf.rows.find(elem => elem.template_id === element.template_id);
 			sInnerHTML += `<div class="d-inline-flex w-100">
@@ -411,7 +443,7 @@
   	});
     return sInnerHTML;
   }
-  
+
 	async function fwTools(balanceGold, balance){
     let sInnerHTML = "";
 		const tools = await getTableRows_byIndex("farmersworld", "tools", wax.userAccount, '2', 'name');
