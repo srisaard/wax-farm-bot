@@ -4,6 +4,16 @@ CODE BASE: https://github.com/worldwide-asset-exchange/waxjs
 > 
 For farmersworld/farmingtales/nftpanda/officeland
 
+<hr>
+<h1>CHANGELOG</h1>
+<h3>=>&nbsp;220128</h3>
+<h5>&emsp;- Auto build farm plot</h5>
+<h5>&emsp;- Auto stake barley/corn</h5>
+<h3>=>&nbsp;220120</h3>
+<h5>&emsp;- Show CPU usage</h5>
+<h5>&emsp;- Update UI</h5>
+<br><hr>
+
 1. Download zip and Extract/Unzip to wherever you want
 2. Install npm and nodejs
 > https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
@@ -28,11 +38,6 @@ node .
 - line notification <br>
 > https://notify-bot.line.me/en/
 <img src="https://user-images.githubusercontent.com/49296797/141815250-6f1aba09-97f6-4024-90f0-bfa75d1a57ad.png" width=40%>
-<br><hr>
-<h1>CHANGELOG</h1>
-<h3>=>&nbsp;220120</h3>
-<h5>&emsp;- Show CPU usage</h5>
-<h5>&emsp;- Update UI</h5>
 <br><hr>
 <h1>SIDE PROJECT FOR SIMULATE PORT</h1>
 https://farmersworld-simulator.vercel.app/
