@@ -1,8 +1,6 @@
 var express = require('express');
 var request = require('request');
 var app = express();
-const dotenv = require('dotenv');
-dotenv.config();
 
 app.use(express.static(__dirname + '/public')); //__dir and not _dir
 app.use(express.urlencoded({extended: true}));
@@ -16,10 +14,9 @@ app.use((req, res, next) => {
     next();  
  });
 
-app.post("/submit", (req, res)=>{
-    const token = process.env.TOKEN
+ app.post("/submit", (req, res)=>{
     const url_line_notification = "https://notify-api.line.me/api/notify";
-    if (token == '') {
+    if (req.body.token == '') {
         res.end("");
     }
 
@@ -30,7 +27,7 @@ app.post("/submit", (req, res)=>{
              'Content-Type': 'multipart/form-data',
          },
          auth: {
-             bearer: token,
+             bearer: req.body.token,
          },
          form: {
              message: req.body.detail
