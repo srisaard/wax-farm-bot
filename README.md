@@ -6,10 +6,13 @@ For farmersworld/farmingtales/nftpanda/officeland
 
 <hr>
 <h1>CHANGELOG</h1>
-<h3>=>&nbsp;220128</h3>
+<h3>=>&nbsp;20220131</h3>
+<h5>&emsp;- Officeland Sleep when SR less than threshold</h5>
+<h5>&emsp;- Line notification token to textbox</h5>
+<h3>=>&nbsp;20220128</h3>
 <h5>&emsp;- Auto build farm plot</h5>
 <h5>&emsp;- Auto stake barley/corn</h5>
-<h3>=>&nbsp;220120</h3>
+<h3>=>&nbsp;20220120</h3>
 <h5>&emsp;- Show CPU usage</h5>
 <h5>&emsp;- Update UI</h5>
 <br><hr>
@@ -17,15 +20,13 @@ For farmersworld/farmingtales/nftpanda/officeland
 1. Download zip and Extract/Unzip to wherever you want
 2. Install npm and nodejs
 > https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-3. Input your line token to .env file
-> TOKEN=uaIASUeuqieuiHAIHFHDAIFNKjdankfJ
-4. run
+3. run
 <img src="https://user-images.githubusercontent.com/49296797/149676211-a0e27305-7fbc-498e-8f77-795f7ad2280e.png" width=70%>
 
 ```
 node .
 ```
-5. open browser and go to
+4. open browser and go to
 > http://localhost:6969/
 
 <br>
@@ -38,6 +39,10 @@ node .
 - line notification <br>
 > https://notify-bot.line.me/en/
 <img src="https://user-images.githubusercontent.com/49296797/141815250-6f1aba09-97f6-4024-90f0-bfa75d1a57ad.png" width=40%>
+
+- Input line token to textbox<br>
+<img src="https://user-images.githubusercontent.com/49296797/151710548-0b86c45a-739c-4bb9-b3de-2f0ab52ca032.png" width=70%>
+
 <br><hr>
 <h1>SIDE PROJECT FOR SIMULATE PORT</h1>
 https://farmersworld-simulator.vercel.app/
