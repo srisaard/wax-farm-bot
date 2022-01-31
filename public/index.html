@@ -28,7 +28,10 @@
 
     <button id="login" onclick=login() >WAX Login</button><br><br>
     <hr>
-    <label>updater:</label><input id="updater"> <input id="lineToken" placeholder="LINE TOKEN HERE"><t></t> 
+    <div class="row d-inline-flex">
+      <label>updater:</label><input id="updater">&nbsp;<input id="lineToken" placeholder="LINE TOKEN HERE">
+      &nbsp;<button class="btn btn-warning btn-sm" type="button" onclick=lineNotifyTest()>TEST LINE NOTIFY</button><t></t> 
+    </div>
     <!-- <label>message:</label> -->
     <input id="message" style="display:none;"><br><br>
     <!-- <label>fail:</label> -->
@@ -1169,6 +1172,17 @@
     milliseconds = time.slice(-3);
 	return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
     //return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2) + ',' + pad(milliseconds, 3);
+  }
+
+  function lineNotifyTest(){
+    $.ajax({
+            type: "POST",
+            url: "/submit",
+            data: {
+                  token: $("#lineToken").val(),
+                  detail: `TEST LINE NOTIFY from SIMPLE Farming bot` 
+              }
+          });
   }
 
 </script>
