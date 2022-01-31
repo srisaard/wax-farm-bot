@@ -26,20 +26,21 @@
 
     <h1>SIMPLE Farming bot</h1>
 
-    <button id="login" onclick=login() >WAX Login</button><br><br>
+    <button id="login" onclick=login() >WAX Login</button><br>
     <hr>
-    <div class="row d-inline-flex">
-      <label>updater:</label><input id="updater">&nbsp;<input id="lineToken" placeholder="LINE TOKEN HERE">
+    <div class="row d-inline-flex" style="align-items: center;">
+      <label class="align-middle">updater: </label><input id="updater">&nbsp;<input id="lineToken" placeholder="LINE TOKEN HERE">
       &nbsp;<button class="btn btn-warning btn-sm" type="button" onclick=lineNotifyTest()>TEST LINE NOTIFY</button><t></t> 
+      &nbsp;<button class="btn btn-secondary btn-sm" type="button" id="sign" onclick=sign()>Sign transaction</button>
     </div>
     <!-- <label>message:</label> -->
     <input id="message" style="display:none;"><br><br>
     <!-- <label>fail:</label> -->
     <input type="checkbox" id="fail" value="fail" style="display:none;"><t>
-    <button id="sign" onclick=sign() >Sign transaction</button><br><br>
+    
     <h5 id="usage"></h5>
     <!-- <label>Current Message</label> -->
-    <h3 id="current" style="display:none;"></h3><br>
+    <h3 id="current" style="display:none;"></h3>
     <hr>
     <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"> </input>    <label id="fwBalance"></label>
     <!-- <br>DEPOSIT GOLD <input id="xx" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button> -->
@@ -47,7 +48,7 @@
     <div class="input-group mb-0" style="display: flex; align-items: center;">
       <div class="col-2"><span class="align-middle">DEPOSIT GOLD</span></div>
       <div class="col-3">
-        <input id="fwDepositFWG" type="text" class="form-control" placeholder="321.1234" aria-label="321.1234" aria-describedby="basic-addon2">
+        <input id="fwDepositFWG" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
       <div class="col-3">  
         <button class="btn btn-warning" type="button" onclick=fwDepositFWG() id="fwDepositFWGButton">DEPOSIT</button>
@@ -56,7 +57,7 @@
     <div class="input-group mb-0" style="display: flex; align-items: center;">
       <div class="col-2"><span class="align-middle">DEPOSIT FOOD</span></div>
       <div class="col-3">
-        <input id="fwDepositFWF" type="text" class="form-control" placeholder="321.1234" aria-label="321.1234" aria-describedby="basic-addon2">
+        <input id="fwDepositFWF" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
       <div class="col-3">  
         <button class="btn btn-primary" type="button" onclick=fwDepositFWF() id="fwDepositFWFButton">DEPOSIT</button>
@@ -72,7 +73,14 @@
     <br><select id = "pandaFoodUnit"></select> <select id = "pandaFoodList"></select>  <button type="button" class="btn btn-outline-primary btn-sm" onclick=pandaBuyFood() id="pandaBuyFoodButton">Buy</button>
     <h5 id="resnftPanda"></h5>
     <hr>
-    <label>Officeland</label>    <input type="checkbox" id="officelandCheck" checked="true"></input>    <label id="officelandBalance"></label> <label>Sleep at 40%</label>
+    <label>Officeland</label>    
+    <input type="checkbox" id="officelandCheck" checked="true"></input>
+    <label id="officelandBalance"></label>
+    <div class="input-group mb-0" style="display: flex; align-items: center;">
+      <div class="col-1"><span class="align-middle" style="font-size: 3.5vw, 2vmin;">Sleep at </span></div>
+      <div class="col-1"><input id="officelandSleepRate" type="text" class="form-control" value="40"></div>
+      <div class="col-1"><span class="align-middle">% </span></div>
+    </div>
     <h5 id="resofficeland"></h5>
     <hr>
     <label>Transaction Results</label>

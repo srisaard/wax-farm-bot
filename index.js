@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 
  app.post("/submit", (req, res)=>{
     const url_line_notification = "https://notify-api.line.me/api/notify";
-    if (req.body.token == '') {
+    if (req.body.token === '') {
         res.end("");
     }
 
