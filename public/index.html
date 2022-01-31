@@ -216,7 +216,7 @@
             type: "POST",
             url: "/submit",
             data: {
-                  token: document.getElementById("lineToken").innerHTML,
+                  token: $("#lineToken").val(),
                   detail: `FW => Need more 🐟\n ${balanceFood} remains!\n` +
                   `Energy ${balance.energy}/${balance.max_energy}` 
               }
@@ -337,7 +337,7 @@
               type: "POST",
               url: "/submit",
               data: {
-                    token: document.getElementById("lineToken").innerHTML,
+                    token: $("#lineToken").val(),
                     detail: `FW => Member Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` 
                 }
             });
@@ -485,7 +485,7 @@
               type: "POST",
               url: "/submit",
               data: {
-                    token: document.getElementById("lineToken").innerHTML,
+                    token: $("#lineToken").val(),
                     detail: `FW => Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` +
                     `current_durability: ${element.current_durability}/${element.durability}\n`+
                     `Energy ${balance.energy}/${balance.max_energy}` 
@@ -504,7 +504,7 @@
             type: "POST",
             url: "/submit",
             data: {
-                  token: document.getElementById("lineToken").innerHTML,
+                  token: $("#lineToken").val(),
                   detail: `FW => Need more 🎟️\n ${balanceGold} remains!\n` +
                   `current_durability: ${element.current_durability}/${element.durability}` 
               }
@@ -649,7 +649,7 @@
         //    type: "POST",
         //    url: "/submit",
         //    data: {
-          // token: document.getElementById("lineToken").innerHTML,
+          // token: $("#lineToken").val(),
         //          detail: `FT => ${coolDown.label} 🐄 HARVEST SUCCESS!`
         //      }
         //  });
@@ -711,7 +711,7 @@
           //    type: "POST",
           //    url: "/submit",
           //    data: {
-            // token: document.getElementById("lineToken").innerHTML,
+            // token: $("#lineToken").val(),
           //          detail: `FT => ${coolDown.label} 🍅 HARVEST SUCCESS!`
           //      }
           //  });
@@ -905,7 +905,7 @@
           //    type: "POST",
           //    url: "/submit",
           //    data: {
-            // token: document.getElementById("lineToken").innerHTML,
+            // token: $("#lineToken").val(),
           //          detail: `Panda => ${res.slots_count[i]} 🐼 HARVEST SUCCESS!\n` +
           //                  `Food remain ${Object.keys(FoodID.data).length}`
           //      }
