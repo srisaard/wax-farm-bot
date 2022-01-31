@@ -221,7 +221,7 @@
             data: {
                   token: $("#lineToken").val(),
                   detail: `FW => Need more 🐟\n ${balanceFood} remains!\n` +
-                  `Energy ${balance.energy}/${balance.max_energy}` 
+                  `Energy ${balance.energy}/${balance.max_energy}`
               }
           });
           return;
@@ -242,7 +242,17 @@
               }]
             };
         let ret = await sign(config);
-        if (ret == true){console.log(`${recover} energy, RECOVER SUCCESS!`);}
+        if (ret == true){
+		console.log(`${recover} energy, RECOVER SUCCESS!`);
+		$.ajax({
+		    type: "POST",
+		    url: "/submit",
+		    data: {
+			  token: $("#lineToken").val(),
+			  detail: `FW => RECOVER SUCCESS 🐟`
+		      }
+		  });
+	}
         else{console.log(`${recover} energy, RECOVER FAILED! ${ret}`);}
     }
   }
@@ -410,13 +420,15 @@
               }]
             };
         let ret = await sign(config);
-        if (ret == true){console.log(`Id ${seed.data[0].asset_id}, STAKE CROPS SUCCESS!`);}
+        if (ret == true){
+		console.log(`Id ${seed.data[0].asset_id}, STAKE CROPS SUCCESS!`);
+	}
         else {console.log(`Id ${seed.data[0].asset_id}, STAKE CROPS FAILED! ${ret}`);}
         }
       });
     }
 
-    crops.forEach(async element => {
+    crops.forEach(async (element, index) => {
 		  	const cropName = cropconf.rows.find(elem => elem.template_id === element.template_id);
 			sInnerHTML += `<div class="d-inline-flex w-100">
 					<div class="badge bg-warning text-dark" style="width: 130px;">${cropName.name}</div>&emsp;
@@ -441,7 +453,15 @@
 					};
 				let ret = await sign(config);
 				if (ret == true){
-					console.log(`Id ${ element.asset_id}, HARVEST SUCCESS!`);
+					console.log(`Id ${element.asset_id}, HARVEST SUCCESS!`);
+					  $.ajax({
+					      type: "POST",
+					      url: "/submit",
+					      data: {
+						    token: $("#lineToken").val(),
+						    detail: `FW => Crops ${index} ${cropName.name}, 🌽 WATERING SUCCESS!\n` 
+						}
+					    });
 				}
 				else{
 					console.log(`Id ${ element.asset_id}, HARVEST FAILED! ${ret}`);
@@ -489,7 +509,7 @@
               url: "/submit",
               data: {
                     token: $("#lineToken").val(),
-                    detail: `FW => Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` +
+                    detail: `FW => ${toolName.template_name} Id ${element.asset_id},🪓 HARVEST SUCCESS!\n` +
                     `current_durability: ${element.current_durability}/${element.durability}\n`+
                     `Energy ${balance.energy}/${balance.max_energy}` 
                 }
@@ -530,7 +550,17 @@
               }]
             };
         let ret = await sign(config);
-        if (ret == true){console.log(`Id ${ element.asset_id}, REPAIR SUCCESS!`);}
+        if (ret == true){
+		console.log(`Id ${ element.asset_id}, REPAIR SUCCESS!`);
+		$.ajax({
+		    type: "POST",
+		    url: "/submit",
+		    data: {
+			  token: $("#lineToken").val(),
+			  detail: `FW => REPAIR ${toolName.template_name} \n Id ${element.asset_id} SUCCESS 🎟️`
+		      }
+		  });
+	}
         else{console.log(`Id ${ element.asset_id}, REPAIR FAILED! ${ret}`);}
       }
     });
