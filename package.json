@@ -1,17 +1,32 @@
 {
   "name": "wax-farm-bot",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "CODE BASE: https://github.com/worldwide-asset-exchange/waxjs\r > donate :beer:: 13.gm\r > \r For farmersworld/farmingtales/nftpanda/officeland",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "13.gm",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "request": "^2.88.2",
     "terser": "^5.10.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srisaard/wax-farm-bot.git"
+  },
+  "keywords": [
+    "farmersworld",
+    "officeland",
+    "nftpanda",
+    "farmingtales"
+  ],
+  "bugs": {
+    "url": "https://github.com/srisaard/wax-farm-bot/issues"
+  },
+  "homepage": "https://github.com/srisaard/wax-farm-bot#readme"
 }
