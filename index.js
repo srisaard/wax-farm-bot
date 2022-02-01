@@ -6,12 +6,12 @@ app.use(express.static(__dirname + '/public')); //__dir and not _dir
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
 
-var port = 6969; // you can use any port
+var port = process.env.PORT || 6969; // you can use any port
 
 // Simple request time logger
 app.use((req, res, next) => {
     console.log("A new request received at " + Date.now());
-    next();  
+    next();
  });
 
 app.post("/submit", (req, res)=>{

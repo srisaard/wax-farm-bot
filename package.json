@@ -4,7 +4,8 @@
   "description": "CODE BASE: https://github.com/worldwide-asset-exchange/waxjs\r > donate :beer:: 13.gm\r > \r For farmersworld/farmingtales/nftpanda/officeland",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+	"start": "node index.js",
+    	"test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "13.gm",
   "license": "ISC",
