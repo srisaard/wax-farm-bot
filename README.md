@@ -6,6 +6,9 @@ For farmersworld/farmingtales/nftpanda/officeland
 
 <hr>
 <h1>CHANGELOG</h1>
+<h3>=>&nbsp;20220202</h3>
+<h5>&emsp;- Officeland : support new patch</h5>
+<h5>&emsp;- New Line notification layouts</h5>
 <h3>=>&nbsp;20220131</h3>
 <h5>&emsp;- Officeland Sleep when SR less than threshold</h5>
 <h5>&emsp;- Line notification token to textbox</h5>
