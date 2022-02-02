@@ -26,9 +26,9 @@
     <button id="login" onclick=login() >WAX Login</button><br>
     <hr>
     <div class="row d-inline-flex" style="align-items: center;">
-      <label class="align-middle">updater: </label><input id="updater">&nbsp;<input id="lineToken" placeholder="LINE TOKEN HERE">
+      <label class="align-middle">updater: </label><input id="updater" style="width: 90px;">&nbsp;<input id="lineToken" placeholder="LINE TOKEN HERE" style="width: 100px;">
       &nbsp;<button class="btn btn-warning btn-sm" type="button" onclick=lineNotifyTest()>TEST LINE NOTIFY</button><t></t> 
-      &nbsp;<button class="btn btn-secondary btn-sm" type="button" id="sign" onclick=sign()>Sign transaction</button>
+      <!-- &nbsp;<button class="btn btn-secondary btn-sm" type="button" id="sign" onclick=sign()>Sign transaction</button> -->
     </div>
     <!-- <label>message:</label> -->
     <input id="message" style="display:none;"><br><br>
@@ -42,22 +42,24 @@
     <label>FarmersWorld</label>    <input type="checkbox" id="fwCheck" checked="true"> </input>    <label id="fwBalance"></label>
     <!-- <br>DEPOSIT GOLD <input id="xx" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button> -->
     <!-- <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br> -->
-    <div class="input-group mb-0" style="display: flex; align-items: center;">
-      <div class="col-2"><span class="align-middle">DEPOSIT GOLD</span></div>
-      <div class="col-3">
+    <div class="input-group mb-0 d-inline-block w-100" style="align-items: center;">
+      <div class="d-inline-block w-15">
+        <span class="align-middle" style="font-style: italic;">DEPOSIT GOLD</span></div>
+      <div class="d-inline-block w-15">
         <input id="fwDepositFWG" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
-      <div class="col-3">  
-        <button class="btn btn-warning" type="button" onclick=fwDepositFWG() id="fwDepositFWGButton">DEPOSIT</button>
+      <div class="d-inline-block w-15">  
+        <button class="btn btn-warning rounded-pill" type="button" onclick=fwDepositFWG() id="fwDepositFWGButton">DEPOSIT</button>
       </div>
     </div>
-    <div class="input-group mb-0" style="display: flex; align-items: center;">
-      <div class="col-2"><span class="align-middle">DEPOSIT FOOD</span></div>
-      <div class="col-3">
+    <div class="input-group mb-0 d-inline-block w-100" style="align-items: center;">
+      <div class="d-inline-block w-15">
+        <span class="align-middle" style="font-style: italic;">DEPOSIT FOOD</span></div>
+      <div class="d-inline-block w-15">
         <input id="fwDepositFWF" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
-      <div class="col-3">  
-        <button class="btn btn-primary" type="button" onclick=fwDepositFWF() id="fwDepositFWFButton">DEPOSIT</button>
+      <div class="d-inline-block w-15">  
+        <button class="btn btn-primary rounded-pill" type="button" onclick=fwDepositFWF() id="fwDepositFWFButton">DEPOSIT</button>
       </div>
     </div>
     <br>
@@ -84,7 +86,8 @@
     <h5 id="response"></h5>
 </div>
 <button type="button" class="regular" name="edit" id="submit" style="display:none;"></button>
-<script src="js/transact.js"></script>
+<script src="js/transaction.js"></script>
+
 <!-- https://obfuscator.io/ -->
 </body>
 </html>
