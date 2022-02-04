@@ -37,14 +37,14 @@ node .
 <img src="https://user-images.githubusercontent.com/49296797/141811955-44838d94-46ce-436c-ba8a-eb87d77cf98a.png" width=70%>
 
 - uncheck if you don't want to mine <br>
-<img src="https://user-images.githubusercontent.com/49296797/149676054-bf88ecac-d82a-4217-bd47-9e9649a02ea0.png" width=70%>
+<img src="https://user-images.githubusercontent.com/49296797/152519043-1a5cc02c-8c34-44a2-808d-fe47cd6bf394.png" width=70%>
 
 - line notification <br>
 > https://notify-bot.line.me/en/
-<img src="https://user-images.githubusercontent.com/49296797/141815250-6f1aba09-97f6-4024-90f0-bfa75d1a57ad.png" width=40%>
+<img src="https://user-images.githubusercontent.com/49296797/152518768-91f1d671-cc1c-427a-ade6-669d0d692c5b.png" width=40%>
 
 - Input line token to textbox<br>
-<img src="https://user-images.githubusercontent.com/49296797/151710548-0b86c45a-739c-4bb9-b3de-2f0ab52ca032.png" width=70%>
+<img src="https://user-images.githubusercontent.com/49296797/152518936-87557e4a-bf86-4c64-ab44-8997e0603d62.png" width=70%>
 
 <br><hr>
 <h1>SIDE PROJECT FOR SIMULATE PORT</h1>
