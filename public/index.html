@@ -22,20 +22,31 @@
   <div class="container">
 
     <h1>SIMPLE Farming bot</h1>
-
-    <button id="login" onclick=login() >WAX Login</button><br>
-    <hr>
-    <div class="row d-inline-flex" style="align-items: center;">
-      <label class="align-middle">updater: </label><input id="updater" style="width: 90px;">&nbsp;<input id="lineToken" placeholder="LINE TOKEN HERE" style="width: 100px;">
-      &nbsp;<button class="btn btn-warning btn-sm" type="button" onclick=lineNotifyTest()>TEST LINE NOTIFY</button><t></t> 
-      <!-- &nbsp;<button class="btn btn-secondary btn-sm" type="button" id="sign" onclick=sign()>Sign transaction</button> -->
+    <div class="d-inline-block w-100">
+      <div class="d-inline-block"><button class="btn btn-secondary btn-sm" type="button" id="login" onclick=login() >WAX Login</button></div>
+      <div class="d-inline-block align-middle text-start" style="width: 120px;"><input type="text" class="form-control" id="updater" readonly></div>
+      <div class="d-inline-block align-middle" style="width: 20%;">
+        <div class="input-group">
+          <span class="input-group-text" id="basic-addon1"><img src="/js/line.png" style="width: 16px;"></span>
+          <input type="text" class="form-control " placeholder="LINE TOKEN HERE" aria-label="Username" aria-describedby="basic-addon1" id="lineToken">
+        </div>
+      </div>
+      <div class="d-inline-block align-middle">
+        <button class="btn btn-warning btn-sm" type="button" onclick=lineNotifyTest()>TEST LINE NOTIFY</button>
+      </div>
     </div>
+    <hr>
+    <!-- <div class="row d-inline-flex" style="align-items: center;">
+      <label class="align-middle">updater: </label><input id="updater" style="width: 90px;">&nbsp;<input id="lineToken" placeholder="LINE TOKEN HERE" style="width: 100px;">
+      <button class="btn btn-warning btn-sm" type="button" onclick=lineNotifyTest()>TEST LINE NOTIFY</button><t></t>  -->
+      <!-- &nbsp;<button class="btn btn-secondary btn-sm" type="button" id="sign" onclick=sign()>Sign transaction</button> -->
+    <!-- </div> -->
     <!-- <label>message:</label> -->
-    <input id="message" style="display:none;"><br><br>
+    <input id="message" style="display:none;">
     <!-- <label>fail:</label> -->
     <input type="checkbox" id="fail" value="fail" style="display:none;"><t>
     
-    <h5 id="usage"></h5>
+    <div class="w-100"><h5 id="usage"></h5></div>
     <!-- <label>Current Message</label> -->
     <h3 id="current" style="display:none;"></h3>
     <hr>
@@ -43,22 +54,22 @@
     <!-- <br>DEPOSIT GOLD <input id="xx" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button> -->
     <!-- <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br> -->
     <div class="input-group mb-0 d-inline-block w-100" style="align-items: center;">
-      <div class="d-inline-block w-15">
+      <div class="d-inline-block">
         <span class="align-middle" style="font-style: italic;">DEPOSIT GOLD</span></div>
-      <div class="d-inline-block w-15">
+      <div class="d-inline-block">
         <input id="fwDepositFWG" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
-      <div class="d-inline-block w-15">  
+      <div class="d-inline-block">
         <button class="btn btn-warning rounded-pill" type="button" onclick=fwDepositFWG() id="fwDepositFWGButton">DEPOSIT</button>
       </div>
     </div>
     <div class="input-group mb-0 d-inline-block w-100" style="align-items: center;">
-      <div class="d-inline-block w-15">
+      <div class="d-inline-block">
         <span class="align-middle" style="font-style: italic;">DEPOSIT FOOD</span></div>
-      <div class="d-inline-block w-15">
+      <div class="d-inline-block">
         <input id="fwDepositFWF" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
-      <div class="d-inline-block w-15">  
+      <div class="d-inline-block">  
         <button class="btn btn-primary rounded-pill" type="button" onclick=fwDepositFWF() id="fwDepositFWFButton">DEPOSIT</button>
       </div>
     </div>
