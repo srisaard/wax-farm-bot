@@ -7,12 +7,17 @@ For farmersworld/farmingtales/nftpanda/officeland
 
 <p align="center"><img src="https://user-images.githubusercontent.com/49296797/152519043-1a5cc02c-8c34-44a2-808d-fe47cd6bf394.png" width=50%></p>
 
+> FarmersWorld  : https://farmersworld.io/ <br>
+> FarmingTales  : https://www.farmingtales.io/ <br>
+> NFTpanda      : https://nftpanda.space/ <br>
+> OfficeLand    : https://officeland.io/ <br>
+
 ## Installation
 Install nodejs and npm
 > https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
 Then run below script
-```
+```sh
 $ git clone https://github.com/srisaard/wax-farm-bot.git
 $ cd wax-farm-bot
 $ npm install express request
@@ -36,9 +41,19 @@ Line notification
 Input line token to textbox<br>
 ><img src="https://user-images.githubusercontent.com/49296797/152518936-87557e4a-bf86-4c64-ab44-8997e0603d62.png" width=50%>
 
+## TODO
+- [x] New Line notification style
+- [ ] Auto switch RPC when server down
+- [ ] Sale/Buy token from alcor exchange
+- [x] Farmersworld
+  - [ ] Farmersworld: Select energy for recover
+  - [ ] Farmersworld: Select durability for repair
+  - [ ] Farmersworld: Same transaction for withdraw
+  - [ ] Farmersworld: Line notify when 5% fee
 
-<hr>
-<h1>CHANGELOG</h1>
+Request feature here [request feature](https://github.com/srisaard/wax-farm-bot/issues)
+
+## CHANGELOG
 <h3>=>&nbsp;20220202</h3>
 <h5>&emsp;- Officeland : support new patch</h5>
 <h5>&emsp;- New Line notification layouts</h5>
