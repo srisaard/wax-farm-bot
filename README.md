@@ -43,7 +43,7 @@ Input line token to textbox<br>
 
 ## TODO
 - [x] New Line notification style
-- [ ] Auto switch RPC when server down
+- [x] Auto switch RPC when server down
 - [ ] Trade token via alcor exchange
 - [x] Farmersworld
   - [ ] Farmersworld: Select energy for recover
