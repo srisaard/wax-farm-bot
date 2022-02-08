@@ -50,6 +50,8 @@ Input line token to textbox<br>
   - [ ] Farmersworld: Select durability for repair
   - [ ] Farmersworld: Same transaction for withdraw
   - [ ] Farmersworld: Line notify when 5% fee
+  - [ ] Farmersworld: Mine when full storing mining [Memberships]
+
 
 Request feature here [request feature](https://github.com/srisaard/wax-farm-bot/issues)
 
