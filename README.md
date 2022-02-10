@@ -46,10 +46,10 @@ Input line token to textbox<br>
 - [x] Auto switch RPC when server down
 - [ ] Trade token via alcor exchange
 - [x] Farmersworld
-  - [ ] Farmersworld: Select energy for recover
-  - [ ] Farmersworld: Select durability for repair
+  - [x] Farmersworld: Select energy for recover
+  - [x] Farmersworld: Select durability for repair
   - [ ] Farmersworld: Same transaction for withdraw
-  - [ ] Farmersworld: Line notify when 5% fee
+  - [x] Farmersworld: Line notify when 5% fee
   - [ ] Farmersworld: Mine when full storing mining [Memberships]
 
 
