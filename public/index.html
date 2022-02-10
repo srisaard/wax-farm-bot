@@ -46,7 +46,7 @@
     <!-- <label>fail:</label> -->
     <input type="checkbox" id="fail" value="fail" style="display:none;"><t>
     
-    <div class="w-100"><h5 id="usage"></h5></div>
+    <div class="d-inline-block w-100"><h5 id="usage"></h5></div>
     <!-- <label>Current Message</label> -->
     <h3 id="current" style="display:none;"></h3>
     <hr>
@@ -54,23 +54,43 @@
     <!-- <br>DEPOSIT GOLD <input id="xx" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWG() id="fwDepositFWGButton">Deposit</button> -->
     <!-- <br>DEPOSIT FOOD <input id="fwDepositFWF" placeholder="432.1234"> <button type="button" class="btn btn-outline-primary btn-sm" onclick=fwDepositFWF() id="fwDepositFWFButton">Deposit</button><br><br> -->
     <div class="input-group mb-0 d-inline-block w-100" style="align-items: center;">
+      <div class="badge d-inline-block" style="background-color: burlywood;">
+        <span class="align-middle">Repair@</span></div>
+      <div class="d-inline-block" style="width: 5%; min-width: 50px;">
+        <input id="fwRepair" type="text" class="form-control-sm text-center" value="30" style="width: 100%;">
+      </div>
+      <div class="d-inline-block">
+        <span class="align-middle" style="font-style: italic;">points</span></div>
+      |
+      <div class="badge bg-primary d-inline-block">
+        <span class="align-middle">Recover@</span></div>
+      <div class="d-inline-block" style="width: 5%; min-width: 50px;">
+        <input id="fwRecover" type="text" class="form-control-sm text-center" value="140" style="width: 100%;">
+      </div>
+      <div class="d-inline-block">
+        <span class="align-middle" style="font-style: italic;">points</span></div>
+    </div>
+    <div style="line-height:12px;">
+      <br>
+    </div>
+    <div class="input-group mb-0 d-inline-block w-100" style="align-items: center;">
       <div class="d-inline-block">
         <span class="align-middle" style="font-style: italic;">DEPOSIT GOLD</span></div>
       <div class="d-inline-block">
-        <input id="fwDepositFWG" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
+        <input id="fwDepositFWG" type="text" class="form-control-sm" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
       <div class="d-inline-block">
-        <button class="btn btn-warning rounded-pill" type="button" onclick=fwDepositFWG() id="fwDepositFWGButton">DEPOSIT</button>
+        <button class="btn-sm btn-warning rounded-pill" type="button" onclick=fwDepositFWG() id="fwDepositFWGButton">DEPOSIT</button>
       </div>
     </div>
     <div class="input-group mb-0 d-inline-block w-100" style="align-items: center;">
       <div class="d-inline-block">
         <span class="align-middle" style="font-style: italic;">DEPOSIT FOOD</span></div>
       <div class="d-inline-block">
-        <input id="fwDepositFWF" type="text" class="form-control" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
+        <input id="fwDepositFWF" type="text" class="form-control-sm" placeholder="EX: 321.1234" aria-label="EX: 321.1234" aria-describedby="basic-addon2">
       </div>
       <div class="d-inline-block">  
-        <button class="btn btn-primary rounded-pill" type="button" onclick=fwDepositFWF() id="fwDepositFWFButton">DEPOSIT</button>
+        <button class="btn-sm btn-primary rounded-pill" type="button" onclick=fwDepositFWF() id="fwDepositFWFButton">DEPOSIT</button>
       </div>
     </div>
     <br>
