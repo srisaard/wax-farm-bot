@@ -1,5 +1,4 @@
 # NPM packages folder.
 node_modules
 
-public/js/transaction.js
 package-lock.json
